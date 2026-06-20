@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    # Map container's port 8080 to host's 8080 as expected
+    ports:
+      - "8080:8080"
+    # Load environment variables directly from your existing .env file
+    env_file:
+      - ./backend/.env
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    # Map Nginx port 80 to host's 5173 (default Vite port) so you can still access via http://localhost:5173
+    ports:
+      - "5173:80"
+    restart: unless-stopped
+    depends_on:
+      - backend
