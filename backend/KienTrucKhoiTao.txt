@@ -1,0 +1,21 @@
+event-management-api/
+├── .env                  <-- Chứa DB_URL, DB_USER, DB_PASS, JWT_SECRET (Không commit lên Git)
+├── .env.example          <-- Template các biến môi trường để tham khảo
+├── .gitignore
+├── pom.xml               <-- Hoặc build.gradle
+└── src/
+    └── main/
+        ├── java/com/project/event/
+        │   ├── EventManagementApplication.java  <-- Entry point
+        │   ├── config/          <-- Cấu hình CORS, Security, Swagger
+        │   ├── controller/      <-- Tiếp nhận HTTP Request (Routing)
+        │   ├── dto/             <-- Data Transfer Objects (Request/Response payload)
+        │   ├── entity/          <-- Các class map trực tiếp với table trong Postgres
+        │   ├── exception/       <-- Xử lý lỗi Global (GlobalExceptionHandler)
+        │   ├── repository/      <-- Spring Data JPA Interfaces
+        │   ├── security/        <-- JWT Filters, Authentication logic
+        │   └── service/         <-- Business logic (giao tiếp giữa Controller và Repository)
+        │       └── impl/        <-- Implementation của Service interfaces
+        └── resources/
+            ├── application.yml  <-- Mapping biến môi trường từ .env vào Spring
+            └── db/migration/    <-- (Tuỳ chọn) Chứa script Flyway/Liquibase

@@ -1,0 +1,19 @@
+event-management-client/
+├── .env                  <-- Chứa VITE_API_BASE_URL (URL của Spring Boot)
+├── .env.example
+├── .gitignore
+├── package.json
+├── vite.config.js
+└── src/
+    ├── main.jsx          <-- Entry point, setup Provider/Router
+    ├── App.jsx           <-- Layout chính
+    ├── assets/           <-- Hình ảnh, font chữ tĩnh
+    ├── components/       <-- UI components dùng chung (Button, Modal, Navbar)
+    ├── config/           <-- Cấu hình axios instance, constants
+    ├── context/          <-- Global state (ví dụ: AuthContext)
+    ├── hooks/            <-- Custom React hooks (useAuth, useFetch)
+    ├── layouts/          <-- Layout wrappers (AuthLayout, MainLayout)
+    ├── pages/            <-- Các trang chính (Home, EventDetail, Dashboard)
+    ├── routes/           <-- Định nghĩa và bảo vệ route (Private/Public)
+    ├── services/         <-- Gọi API (ví dụ: eventService.js, authService.js)
+    └── utils/            <-- Các hàm helper (formatDate, validator)
