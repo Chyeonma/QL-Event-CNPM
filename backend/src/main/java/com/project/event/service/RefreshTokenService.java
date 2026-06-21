@@ -80,4 +80,9 @@ public class RefreshTokenService {
             refreshTokenRepository.save(rt);
         });
     }
+
+    @Transactional
+    public void revokeAllByUserId(UUID userId) {
+        refreshTokenRepository.revokeAllByUserId(userId);
+    }
 }

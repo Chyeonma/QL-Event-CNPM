@@ -85,5 +85,8 @@ public class AuthServiceImpl implements AuthService {
         user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
         user.setRequirePasswordChange(false);
         userRepository.save(user);
+
+        // Nâng cấp bảo mật: Khi đổi mật khẩu, huỷ toàn bộ Refresh Token cũ (đăng xuất khỏi tất cả thiết bị)
+        refreshTokenService.revokeAllByUserId(userId);
     }
 }
