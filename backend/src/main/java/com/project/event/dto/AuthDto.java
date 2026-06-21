@@ -59,4 +59,19 @@ public interface AuthDto {
             @NotBlank(message = "Token từ Google không được để trống")
             String idToken
     ) {}
+
+    // 7. DTO cho User Info
+    @Builder
+    record UserInfoResponse(
+            java.util.UUID id,
+            String studentCode,
+            String email,
+            String fullName,
+            String role,
+            String avatarUrl,
+            String classCode,
+            String major,
+            String batch,
+            Boolean requirePasswordChange
+    ) {}
 }

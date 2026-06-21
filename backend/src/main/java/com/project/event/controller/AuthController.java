@@ -52,4 +52,21 @@ public class AuthController {
     public ResponseEntity<AuthDto.AuthResponse> googleLogin(@Valid @RequestBody AuthDto.GoogleLoginRequest request) {
         return ResponseEntity.ok(authService.googleLogin(request));
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<AuthDto.UserInfoResponse> getCurrentUser() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return ResponseEntity.ok(AuthDto.UserInfoResponse.builder()
+                .id(user.getId())
+                .studentCode(user.getStudentCode())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .role(user.getRole())
+                .avatarUrl(user.getAvatarUrl())
+                .classCode(user.getClassCode())
+                .major(user.getMajor())
+                .batch(user.getBatch())
+                .requirePasswordChange(user.getRequirePasswordChange())
+                .build());
+    }
 }
