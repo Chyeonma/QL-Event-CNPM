@@ -53,4 +53,10 @@ public interface AuthDto {
             @NotBlank(message = "Email không được để trống")
             String email
     ) {}
+
+    // 6. DTO cho Google Login
+    record GoogleLoginRequest(
+            @NotBlank(message = "Token từ Google không được để trống")
+            String idToken
+    ) {}
 }

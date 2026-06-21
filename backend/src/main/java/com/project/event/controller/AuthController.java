@@ -47,4 +47,9 @@ public class AuthController {
         authService.forgotPassword(request);
         return ResponseEntity.ok(Map.of("message", "Nếu tài khoản đã được kích hoạt (Đăng nhập lần đầu), mật khẩu mới sẽ được gửi vào email của bạn"));
     }
+
+    @PostMapping("/google-login")
+    public ResponseEntity<AuthDto.AuthResponse> googleLogin(@Valid @RequestBody AuthDto.GoogleLoginRequest request) {
+        return ResponseEntity.ok(authService.googleLogin(request));
+    }
 }

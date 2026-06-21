@@ -10,4 +10,5 @@ public interface AuthService {
     void logout(AuthDto.RefreshTokenRequest request);
     void changePassword(UUID userId, AuthDto.ChangePasswordRequest request);
     void forgotPassword(AuthDto.ForgotPasswordRequest request);
+    AuthDto.AuthResponse googleLogin(AuthDto.GoogleLoginRequest request);
 }
