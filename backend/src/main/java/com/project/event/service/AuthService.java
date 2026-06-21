@@ -9,4 +9,5 @@ public interface AuthService {
     AuthDto.AuthResponse refreshToken(AuthDto.RefreshTokenRequest request);
     void logout(AuthDto.RefreshTokenRequest request);
     void changePassword(UUID userId, AuthDto.ChangePasswordRequest request);
+    void forgotPassword(AuthDto.ForgotPasswordRequest request);
 }

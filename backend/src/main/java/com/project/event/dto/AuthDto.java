@@ -8,10 +8,9 @@ public interface AuthDto {
 
     // 1. DTO cho Login
     record LoginRequest(
-            @NotBlank(message = "Mã sinh viên không được để trống") 
-            String studentCode,
+            @NotBlank(message = "Tài khoản (Email hoặc Mã sinh viên) không được để trống") 
+            String identifier,
 
-            @NotBlank(message = "Mật khẩu không được để trống") 
             String password
     ) {}
 
@@ -47,5 +46,11 @@ public interface AuthDto {
             @NotBlank(message = "Mật khẩu mới không được để trống")
             @Size(min = 8, message = "Mật khẩu mới phải có ít nhất 8 ký tự") 
             String newPassword
+    ) {}
+
+    // 5. DTO cho Quên mật khẩu
+    record ForgotPasswordRequest(
+            @NotBlank(message = "Email không được để trống")
+            String email
     ) {}
 }

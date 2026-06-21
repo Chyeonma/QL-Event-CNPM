@@ -41,4 +41,10 @@ public class AuthController {
         authService.changePassword(user.getId(), request);
         return ResponseEntity.ok(Map.of("message", "Đổi mật khẩu thành công"));
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, String>> forgotPassword(@Valid @RequestBody AuthDto.ForgotPasswordRequest request) {
+        authService.forgotPassword(request);
+        return ResponseEntity.ok(Map.of("message", "Nếu tài khoản đã được kích hoạt (Đăng nhập lần đầu), mật khẩu mới sẽ được gửi vào email của bạn"));
+    }
 }
