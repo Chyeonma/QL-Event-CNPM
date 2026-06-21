@@ -1,6 +1,4 @@
 package com.project.event.security;
-
-import com.project.event.entity.User;
 import com.project.event.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
