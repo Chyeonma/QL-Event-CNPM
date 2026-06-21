@@ -26,11 +26,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthDto.AuthResponse login(AuthDto.LoginRequest request) {
-        // Thay getStudentCode() bằng studentCode()
         User user = userRepository.findByStudentCodeAndIsDeletedFalse(request.studentCode())
                 .orElseThrow(() -> new BadCredentialsException("Mã sinh viên hoặc mật khẩu không đúng"));
 
-        // Thay getPassword() bằng password()
         if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
             throw new BadCredentialsException("Mã sinh viên hoặc mật khẩu không đúng");
         }

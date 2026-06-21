@@ -35,12 +35,16 @@ public class RefreshTokenService {
         return refreshTokenRepository.save(refreshToken);
     }
 
+    @Transactional
     public RefreshToken verifyRefreshToken(String token) {
         RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
                 .orElseThrow(() -> new TokenRefreshException("Refresh token không tồn tại"));
 
         if (refreshToken.getRevoked()) {
-            throw new TokenRefreshException("Refresh token đã bị thu hồi");
+            // Nâng cấp 1: Token Reuse Detection
+            // Nếu phát hiện dùng lại thẻ đã thu hồi -> Khóa TOÀN BỘ các thẻ của User này để văng cả Hacker lẫn User
+            refreshTokenRepository.revokeAllByUserId(refreshToken.getUser().getId());
+            throw new TokenRefreshException("Phát hiện truy cập bất thường! Toàn bộ phiên đăng nhập đã bị vô hiệu hóa.");
         }
 
         if (refreshToken.getExpiryDate().isBefore(Instant.now())) {
@@ -60,7 +64,9 @@ public class RefreshTokenService {
         RefreshToken newToken = RefreshToken.builder()
                 .user(oldToken.getUser())
                 .token(UUID.randomUUID().toString())
-                .expiryDate(Instant.now().plusMillis(refreshTokenExpiration))
+                // Nâng cấp 2: Hạn chót tuyệt đối (Absolute Expiration)
+                // Kế thừa lại đúng hạn sử dụng của thẻ cũ thay vì cộng thêm 7 ngày
+                .expiryDate(oldToken.getExpiryDate())
                 .revoked(false)
                 .build();
 
