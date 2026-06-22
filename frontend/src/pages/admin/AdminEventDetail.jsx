@@ -11,7 +11,10 @@ import {
   Clock, 
   Calendar,
   Users,
-  Target
+  Target,
+  ImagePlus,
+  Download,
+  Trash2
 } from 'lucide-react';
 
 // Mock data sinh viên đăng ký
@@ -133,40 +136,89 @@ const AdminEventDetail = () => {
           
           {/* TAB 1: THÔNG TIN CHUNG */}
           {activeTab === 'general' && (
-            <div style={{ display: 'grid', gap: '20px', maxWidth: '800px', opacity: isEditing ? 1 : 0.85 }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <label style={{ fontWeight: '500' }}>Tên sự kiện</label>
-                <input type="text" disabled={!isEditing} defaultValue="Hội thảo Nghiên cứu Khoa học N23" style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', cursor: isEditing ? 'text' : 'not-allowed' }} />
-              </div>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: '40px', opacity: isEditing ? 1 : 0.85 }}>
+              {/* CỘT TRÁI: FORM NHẬP LIỆU */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontWeight: '500' }}>Bắt đầu</label>
-                  <input type="datetime-local" disabled={!isEditing} defaultValue="2026-06-24T08:00" style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', cursor: isEditing ? 'text' : 'not-allowed' }} />
+                  <label style={{ fontWeight: '500' }}>Tên sự kiện</label>
+                  <input type="text" disabled={!isEditing} defaultValue="Hội thảo Nghiên cứu Khoa học N23" style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', cursor: isEditing ? 'text' : 'not-allowed' }} />
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontWeight: '500' }}>Kết thúc</label>
-                  <input type="datetime-local" disabled={!isEditing} defaultValue="2026-06-24T11:30" style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', cursor: isEditing ? 'text' : 'not-allowed' }} />
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontWeight: '500' }}>Địa điểm</label>
-                  <div style={{ display: 'flex', alignItems: 'center', background: isEditing ? '#ffffff' : '#f8fafc', border: '1px solid #dde5ef', borderRadius: '8px', padding: '0 12px', cursor: isEditing ? 'text' : 'not-allowed' }}>
-                    <MapPin size={18} color="#6b7280" />
-                    <input type="text" disabled={!isEditing} defaultValue="Hội trường A1" style={{ flex: 1, padding: '12px', border: 'none', background: 'transparent', color: '#111827', outline: 'none', cursor: isEditing ? 'text' : 'not-allowed' }} />
+                
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ fontWeight: '500' }}>Bắt đầu</label>
+                    <input type="datetime-local" disabled={!isEditing} defaultValue="2026-06-24T08:00" style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', cursor: isEditing ? 'text' : 'not-allowed' }} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ fontWeight: '500' }}>Kết thúc</label>
+                    <input type="datetime-local" disabled={!isEditing} defaultValue="2026-06-24T11:30" style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', cursor: isEditing ? 'text' : 'not-allowed' }} />
                   </div>
                 </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ fontWeight: '500' }}>Địa điểm</label>
+                    <div style={{ display: 'flex', alignItems: 'center', background: isEditing ? '#ffffff' : '#f8fafc', border: '1px solid #dde5ef', borderRadius: '8px', padding: '0 12px', cursor: isEditing ? 'text' : 'not-allowed' }}>
+                      <MapPin size={18} color="#6b7280" />
+                      <input type="text" disabled={!isEditing} defaultValue="Hội trường A1" style={{ flex: 1, padding: '12px', border: 'none', background: 'transparent', color: '#111827', outline: 'none', cursor: isEditing ? 'text' : 'not-allowed' }} />
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ fontWeight: '500' }}>Sức chứa (Capacity)</label>
+                    <input type="number" disabled={!isEditing} defaultValue="120" style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', cursor: isEditing ? 'text' : 'not-allowed' }} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ fontWeight: '500' }}>Điểm rèn luyện</label>
+                    <input type="number" disabled={!isEditing} defaultValue="5" style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', cursor: isEditing ? 'text' : 'not-allowed' }} />
+                  </div>
+                </div>
+
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontWeight: '500' }}>Sức chứa (Capacity)</label>
-                  <input type="number" disabled={!isEditing} defaultValue="120" style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', cursor: isEditing ? 'text' : 'not-allowed' }} />
+                  <label style={{ fontWeight: '500' }}>Mô tả chi tiết</label>
+                  <textarea rows="4" disabled={!isEditing} defaultValue="Hội thảo thường niên dành cho sinh viên N23 nhằm định hướng và cung cấp kỹ năng NCKH..." style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', resize: 'vertical', cursor: isEditing ? 'text' : 'not-allowed' }}></textarea>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <label style={{ fontWeight: '500' }}>Mô tả chi tiết</label>
-                <textarea rows="4" disabled={!isEditing} defaultValue="Hội thảo thường niên dành cho sinh viên N23 nhằm định hướng và cung cấp kỹ năng NCKH..." style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', resize: 'vertical', cursor: isEditing ? 'text' : 'not-allowed' }}></textarea>
+              {/* CỘT PHẢI: QUẢN LÝ HÌNH ẢNH */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <label style={{ fontWeight: '500' }}>Hình ảnh sự kiện</label>
+                <div style={{ 
+                  border: '2px dashed #dde5ef', 
+                  borderRadius: '12px', 
+                  padding: '40px 20px', 
+                  textAlign: 'center',
+                  background: isEditing ? '#f8fafc' : '#ffffff',
+                  cursor: isEditing ? 'pointer' : 'not-allowed',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '12px'
+                }}>
+                  <ImagePlus size={36} color="#94a3b8" />
+                  <div>
+                    <strong style={{ color: '#4f46e5', display: 'block', marginBottom: '4px' }}>Click để tải ảnh lên</strong>
+                    <span style={{ color: '#6b7280', fontSize: '13px' }}>Chỉ hỗ trợ JPG, PNG (Tối đa 5MB)</span>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', border: '1px solid #dde5ef', aspectRatio: '16/9' }}>
+                    <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500&q=80" alt="event" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    {isEditing && (
+                      <button style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', borderRadius: '4px', padding: '6px', cursor: 'pointer' }}>
+                        <Trash2 size={14} />
+                      </button>
+                    )}
+                  </div>
+                  <div style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', border: '1px solid #dde5ef', aspectRatio: '16/9' }}>
+                    <img src="https://images.unsplash.com/photo-1515169067868-5387ec356754?w=500&q=80" alt="event" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    {isEditing && (
+                      <button style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', borderRadius: '4px', padding: '6px', cursor: 'pointer' }}>
+                        <Trash2 size={14} />
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -223,15 +275,23 @@ const AdminEventDetail = () => {
                   />
                 </label>
 
-                <div style={{ display: 'flex', gap: '16px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                    <span style={{ fontSize: '13px', color: '#6b7280' }}>Tổng đăng ký</span>
-                    <strong style={{ fontSize: '16px' }}>95 / 120</strong>
+                <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: '16px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                      <span style={{ fontSize: '13px', color: '#6b7280' }}>Tổng đăng ký</span>
+                      <strong style={{ fontSize: '16px' }}>95 / 120</strong>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                      <span style={{ fontSize: '13px', color: '#6b7280' }}>Đã điểm danh</span>
+                      <strong style={{ fontSize: '16px', color: 'var(--primary-color)' }}>2 / 95</strong>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                    <span style={{ fontSize: '13px', color: '#6b7280' }}>Đã điểm danh</span>
-                    <strong style={{ fontSize: '16px', color: 'var(--primary-color)' }}>2 / 95</strong>
-                  </div>
+
+                  <div style={{ width: '1px', height: '32px', background: '#dde5ef' }}></div>
+
+                  <button className="btn btn-secondary" style={{ background: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Download size={16} /> Xuất Excel
+                  </button>
                 </div>
               </div>
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   Bell,
@@ -12,6 +12,7 @@ import {
   Mail,
   MessageSquare,
   Moon,
+  Sun,
   Search,
   Settings,
   ShieldCheck,
@@ -50,6 +51,19 @@ const menuSections = [
 const AdminLayout = ({ children }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem('adminTheme') === 'dark';
+  });
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('adminTheme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('adminTheme', 'light');
+    }
+  }, [isDarkMode]);
 
   const avatarUrl =
     user?.avatarUrl ||
@@ -128,8 +142,13 @@ const AdminLayout = ({ children }) => {
           </label>
 
           <div className="admin-topbar-actions">
-            <button className="admin-icon-button admin-theme-toggle" type="button" title="Giao diện">
-              <Moon size={18} />
+            <button 
+              className="admin-icon-button admin-theme-toggle" 
+              type="button" 
+              title="Chuyển giao diện"
+              onClick={() => setIsDarkMode(!isDarkMode)}
+            >
+              {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
             </button>
             <button className="admin-icon-button" type="button" title="Thông báo">
               <Bell size={19} />

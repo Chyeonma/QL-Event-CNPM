@@ -1361,3 +1361,297 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================================
+   React Big Calendar Customizations
+   ========================================================================== */
+.rbc-calendar {
+  font-family: var(--font-family);
+}
+
+/* Header các ngày trong tuần (Thứ 2, Thứ 3...) */
+.rbc-header {
+  padding: 12px 0;
+  font-weight: 600;
+  color: #334155;
+  background: #f1f5f9;
+  border-bottom: 2px solid #e2e8f0;
+  text-transform: capitalize;
+  font-size: 14px;
+}
+
+.rbc-header + .rbc-header {
+  border-left: 1px solid #e2e8f0;
+}
+
+/* Viền khung tổng thể */
+.rbc-month-view, .rbc-time-view, .rbc-agenda-view {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+  background: #ffffff;
+}
+
+.rbc-day-bg + .rbc-day-bg {
+  border-left: 1px solid #e2e8f0;
+}
+
+.rbc-month-row + .rbc-month-row {
+  border-top: 1px solid #e2e8f0;
+}
+
+/* Highlight hôm nay */
+.rbc-today {
+  background-color: #f0fdf4 !important; /* Xanh lá nhạt */
+}
+
+/* Các ngày của tháng trước/sau */
+.rbc-off-range-bg {
+  background-color: #f8fafc;
+}
+
+.rbc-date-cell {
+  padding: 6px 10px;
+  font-weight: 600;
+  color: #475569;
+  font-size: 14px;
+}
+
+/* Kiểu dáng khối sự kiện */
+.rbc-event {
+  padding: 4px 8px;
+  margin: 2px 4px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.rbc-event:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+  filter: brightness(1.1);
+  cursor: pointer;
+}
+
+.rbc-event-content {
+  font-size: 12.5px;
+}
+
+/* Nút bấm thanh công cụ (Toolbar) */
+.rbc-toolbar {
+  margin-bottom: 16px;
+}
+
+.rbc-toolbar button {
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 500;
+  transition: all 0.2s;
+  background: #ffffff;
+  font-size: 14px;
+}
+
+.rbc-toolbar button:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.rbc-toolbar button:active,
+.rbc-toolbar button.rbc-active {
+  background: #4f46e5;
+  color: #ffffff;
+  border-color: #4f46e5;
+  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+}
+
+.rbc-toolbar button.rbc-active:hover {
+  background: #4338ca;
+  color: #ffffff;
+}
+
+.rbc-btn-group {
+  display: flex;
+  gap: 6px;
+}
+
+.rbc-btn-group + .rbc-btn-group {
+  margin-left: 16px;
+}
+
+/* Chữ tiêu đề Tháng */
+.rbc-toolbar .rbc-toolbar-label {
+  font-weight: 700;
+  font-size: 20px;
+  color: #0f172a;
+}
+
+/* ==========================================================================
+   Dark Mode Overrides (Admin)
+   ========================================================================== */
+[data-theme="dark"] .admin-shell {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .admin-sidebar,
+[data-theme="dark"] .admin-topbar,
+[data-theme="dark"] .admin-panel,
+[data-theme="dark"] .admin-stat-card,
+[data-theme="dark"] .admin-page-header button.admin-primary-action,
+[data-theme="dark"] .rbc-month-view,
+[data-theme="dark"] .rbc-time-view,
+[data-theme="dark"] .rbc-agenda-view,
+[data-theme="dark"] .rbc-toolbar button,
+[data-theme="dark"] .rbc-header,
+[data-theme="dark"] .admin-icon-button {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .admin-sidebar-nav a:hover,
+[data-theme="dark"] .admin-icon-button:hover,
+[data-theme="dark"] .rbc-toolbar button:hover {
+  background: #334155 !important;
+  color: #818cf8 !important;
+}
+
+[data-theme="dark"] .admin-sidebar-nav a.active {
+  background: rgba(99, 102, 241, 0.15) !important;
+  color: #818cf8 !important;
+}
+
+[data-theme="dark"] .admin-search input,
+[data-theme="dark"] .admin-panel-header h2,
+[data-theme="dark"] .admin-user-menu,
+[data-theme="dark"] .admin-sidebar-header h2,
+[data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3, [data-theme="dark"] strong, [data-theme="dark"] label {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .admin-panel-header p,
+[data-theme="dark"] .admin-search,
+[data-theme="dark"] .admin-mini-legend span,
+[data-theme="dark"] .rbc-date-cell,
+[data-theme="dark"] p, [data-theme="dark"] span {
+  color: #94a3b8 !important;
+}
+
+/* Tabs */
+[data-theme="dark"] .admin-tab {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .admin-tab.active {
+  color: #818cf8 !important;
+  border-bottom-color: #818cf8 !important;
+}
+[data-theme="dark"] .admin-tab:hover {
+  color: #f8fafc !important;
+}
+
+/* Badges */
+[data-theme="dark"] .admin-status-badge.published {
+  background: rgba(79, 70, 229, 0.2) !important;
+  color: #818cf8 !important;
+}
+[data-theme="dark"] .admin-status-badge.draft {
+  background: rgba(148, 163, 184, 0.2) !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .admin-status-badge.closed {
+  background: rgba(16, 185, 129, 0.2) !important;
+  color: #34d399 !important;
+}
+
+[data-theme="dark"] .admin-table th {
+  background: #0f172a !important;
+  color: #94a3b8 !important;
+  border-bottom: 1px solid #334155 !important;
+}
+
+[data-theme="dark"] .admin-table td {
+  border-bottom: 1px solid #334155 !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .admin-table tr:hover {
+  background: #334155 !important;
+}
+
+[data-theme="dark"] .rbc-off-range-bg {
+  background: rgba(15, 23, 42, 0.4) !important;
+}
+
+[data-theme="dark"] .rbc-agenda-view table.rbc-agenda-table tbody > tr > td,
+[data-theme="dark"] .rbc-agenda-view table.rbc-agenda-table thead > tr > th,
+[data-theme="dark"] .rbc-agenda-time-cell,
+[data-theme="dark"] .rbc-agenda-date-cell,
+[data-theme="dark"] .rbc-agenda-event-cell {
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+  background: #1e293b !important;
+}
+
+[data-theme="dark"] .rbc-agenda-empty {
+  color: #94a3b8 !important;
+  background: #1e293b !important;
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] input:disabled,
+[data-theme="dark"] select:disabled,
+[data-theme="dark"] textarea:disabled {
+  background: #1e293b !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .btn-secondary {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+[data-theme="dark"] .rbc-today {
+  background: rgba(16, 185, 129, 0.1) !important;
+}
+
+/* Inline Styles / Modal Overrides */
+[data-theme="dark"] [style*="background: #ffffff"],
+[data-theme="dark"] [style*="background: rgb(255, 255, 255)"],
+[data-theme="dark"] [style*="background: '#ffffff'"] {
+  background: #1e293b !important;
+}
+[data-theme="dark"] [style*="background: #f8fafc"],
+[data-theme="dark"] [style*="background: rgb(248, 250, 252)"] {
+  background: #0f172a !important;
+}
+[data-theme="dark"] [style*="background: #f0fdf4"] {
+  background: rgba(16, 185, 129, 0.15) !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+  color: #34d399 !important;
+}
+[data-theme="dark"] [style*="border: 1px solid #dde5ef"],
+[data-theme="dark"] [style*="border-bottom: 1px solid #dde5ef"],
+[data-theme="dark"] [style*="border-top: 1px solid #dde5ef"],
+[data-theme="dark"] [style*="border: 2px dashed #dde5ef"] {
+  border-color: #334155 !important;
+}
+[data-theme="dark"] [style*="color: #111827"],
+[data-theme="dark"] [style*="color: #0f172a"],
+[data-theme="dark"] [style*="color: rgb(17, 24, 39)"] {
+  color: #f8fafc !important;
+}
+[data-theme="dark"] [style*="color: #6b7280"],
+[data-theme="dark"] [style*="color: rgb(107, 114, 128)"] {
+  color: #94a3b8 !important;
+}

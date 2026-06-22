@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, Plus, Edit, Trash2, Users, MoreHorizontal } from 'lucide-react';
+import { Search, Filter, Plus, Edit, Trash2, Users, MoreHorizontal, X } from 'lucide-react';
 import { Calendar as BigCalendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -80,6 +80,7 @@ const AdminEvents = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   // Chuẩn bị dữ liệu cho Lịch
   const calendarEvents = mockEvents.map(event => {
@@ -121,7 +122,7 @@ const AdminEvents = () => {
           <p>Quản lý</p>
           <h1>Danh sách sự kiện</h1>
         </div>
-        <button className="admin-primary-action" type="button">
+        <button className="admin-primary-action" type="button" onClick={() => setShowCreateModal(true)}>
           <Plus size={18} style={{ marginRight: '8px' }} />
           Tạo sự kiện
         </button>
@@ -315,6 +316,61 @@ const AdminEvents = () => {
           </table>
         </div>
       </section>
+
+      {/* MODAL TẠO SỰ KIỆN MỚI */}
+      {showCreateModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#ffffff', width: '100%', maxWidth: '540px', borderRadius: '16px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', overflow: 'hidden', animation: 'scaleUp 0.2s ease-out' }}>
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid #dde5ef', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a' }}>Tạo sự kiện mới</h2>
+                <p style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>Khởi tạo một bản nháp sự kiện vào hệ thống</p>
+              </div>
+              <button onClick={() => setShowCreateModal(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px' }}>
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <label style={{ fontWeight: '600', fontSize: '14px', color: '#334155' }}>Tên sự kiện <span style={{ color: '#ef4444' }}>*</span></label>
+                <input type="text" placeholder="Nhập tên sự kiện..." style={{ padding: '12px 16px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '15px', color: '#0f172a' }} />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label style={{ fontWeight: '600', fontSize: '14px', color: '#334155' }}>Ngày giờ bắt đầu <span style={{ color: '#ef4444' }}>*</span></label>
+                  <input type="datetime-local" style={{ padding: '12px 16px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '15px', color: '#0f172a' }} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label style={{ fontWeight: '600', fontSize: '14px', color: '#334155' }}>Địa điểm dự kiến</label>
+                  <input type="text" placeholder="VD: Hội trường A" style={{ padding: '12px 16px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '15px', color: '#0f172a' }} />
+                </div>
+              </div>
+            </div>
+
+            <div style={{ padding: '16px 24px', borderTop: '1px solid #e2e8f0', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+              <button 
+                className="btn btn-secondary" 
+                onClick={() => setShowCreateModal(false)} 
+                style={{ background: '#ffffff', color: '#475569', border: '1px solid #cbd5e1', fontWeight: '600', padding: '10px 20px', borderRadius: '8px' }}
+              >
+                Hủy bỏ
+              </button>
+              <button 
+                className="btn btn-primary" 
+                onClick={() => {
+                  setShowCreateModal(false);
+                  navigate('/admin/events/new'); // Giả lập điều hướng đến trang chi tiết bản nháp
+                }} 
+                style={{ background: 'var(--primary-color)', color: '#fff', border: 'none', fontWeight: '600', padding: '10px 24px', borderRadius: '8px', boxShadow: '0 4px 6px rgba(79, 70, 229, 0.2)' }}
+              >
+                Tạo Bản nháp
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
