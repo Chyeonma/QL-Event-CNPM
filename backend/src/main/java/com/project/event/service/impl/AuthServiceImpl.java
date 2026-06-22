@@ -38,7 +38,6 @@ public class AuthServiceImpl implements AuthService {
     private String googleClientId;
 
     @Override
-    @Transactional
     public AuthDto.AuthResponse login(AuthDto.LoginRequest request) {
         User user = userRepository.findByIdentifier(request.identifier())
                 .orElseThrow(() -> new BadCredentialsException("Tài khoản hoặc mật khẩu không đúng"));
@@ -62,8 +61,8 @@ public class AuthServiceImpl implements AuthService {
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
         // Gửi thông báo đăng nhập
-        String time = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
-        emailService.sendLoginNotificationEmail(user.getEmail(), user.getFullName(), time);
+        //String time = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
+        //emailService.sendLoginNotificationEmail(user.getEmail(), user.getFullName(), time);
 
         return AuthDto.AuthResponse.builder()
                 .accessToken(accessToken)
@@ -153,7 +152,7 @@ public class AuthServiceImpl implements AuthService {
             GoogleIdToken.Payload payload = idToken.getPayload();
             String email = payload.getEmail();
 
-            User user = userRepository.findByEmailAndIsDeletedFalse(email)
+            User user = userRepository.findByEmailIgnoreCaseAndIsDeletedFalse(email)
                     .orElseThrow(() -> new BadCredentialsException("Email chưa được đăng ký trong hệ thống"));
 
             // Tự động lưu googleId và cập nhật avatar nếu có thay đổi

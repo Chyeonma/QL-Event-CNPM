@@ -13,9 +13,11 @@ import java.util.UUID;
 public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByStudentCodeAndIsDeletedFalse(String studentCode);
     Optional<User> findByEmailAndIsDeletedFalse(String email);
+    Optional<User> findByEmailIgnoreCaseAndIsDeletedFalse(String email);
     boolean existsByStudentCode(String studentCode);
     boolean existsByEmail(String email);
 
-    @Query("SELECT u FROM User u WHERE (u.studentCode = :identifier OR u.email = :identifier) AND u.isDeleted = false")
+    @Query("SELECT u FROM User u WHERE (LOWER(TRIM(u.studentCode)) = LOWER(TRIM(:identifier)) OR LOWER(TRIM(u.email)) = LOWER(TRIM(:identifier))) AND u.isDeleted = false")
     Optional<User> findByIdentifier(@Param("identifier") String identifier);
 }
+
