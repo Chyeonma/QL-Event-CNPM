@@ -1,6 +1,22 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Filter, Plus, Edit, Trash2, Users, MoreHorizontal } from 'lucide-react';
+import { Calendar as BigCalendar, dateFnsLocalizer } from 'react-big-calendar';
+import { format, parse, startOfWeek, getDay } from 'date-fns';
+import { vi } from 'date-fns/locale';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+const locales = {
+  'vi': vi,
+};
+
+const localizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek,
+  getDay,
+  locales,
+});
 
 const mockEvents = [
   {
@@ -65,6 +81,32 @@ const AdminEvents = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
+  // Chuẩn bị dữ liệu cho Lịch
+  const calendarEvents = mockEvents.map(event => {
+    const [day, month, year] = event.date.split('/');
+    let startHour = 8, startMin = 0, endHour = 12, endMin = 0;
+    
+    if (event.time) {
+      const times = event.time.split(' - ');
+      if (times.length === 2) {
+        const startParts = times[0].split(':');
+        const endParts = times[1].split(':');
+        startHour = parseInt(startParts[0], 10);
+        startMin = parseInt(startParts[1], 10);
+        endHour = parseInt(endParts[0], 10);
+        endMin = parseInt(endParts[1], 10);
+      }
+    }
+
+    return {
+      id: event.id,
+      title: event.title,
+      start: new Date(year, month - 1, day, startHour, startMin),
+      end: new Date(year, month - 1, day, endHour, endMin),
+      resource: event,
+    };
+  });
+
   // Lọc sự kiện dựa trên tìm kiếm và trạng thái
   const filteredEvents = mockEvents.filter((event) => {
     const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -85,6 +127,38 @@ const AdminEvents = () => {
         </button>
       </section>
 
+      {/* LỊCH SỰ KIỆN */}
+      <section className="admin-panel" style={{ marginTop: '24px', padding: '20px', overflow: 'hidden' }}>
+        <h2 style={{ fontSize: '16px', marginBottom: '16px', fontWeight: '600' }}>🗓️ Thời khóa biểu sự kiện</h2>
+        <div style={{ height: '450px' }}>
+          <BigCalendar
+            localizer={localizer}
+            events={calendarEvents}
+            startAccessor="start"
+            endAccessor="end"
+            culture="vi"
+            messages={{
+              next: "Tiếp",
+              previous: "Trước",
+              today: "Hôm nay",
+              month: "Tháng",
+              week: "Tuần",
+              day: "Ngày",
+              agenda: "Lịch trình",
+              noEventsInRange: "Không có sự kiện nào trong khoảng thời gian này.",
+            }}
+            onSelectEvent={(event) => navigate(`/admin/events/${event.id}`)}
+            eventPropGetter={(event) => {
+              let backgroundColor = '#4f46e5'; // published
+              if (event.resource.status === 'DRAFT') backgroundColor = '#38bdf8';
+              if (event.resource.status === 'CLOSED') backgroundColor = '#10b981';
+              return { style: { backgroundColor, borderRadius: '4px', border: 'none', opacity: 0.9, fontSize: '13px' } };
+            }}
+          />
+        </div>
+      </section>
+
+      {/* DANH SÁCH SỰ KIỆN */}
       <section className="admin-panel" style={{ marginTop: '24px' }}>
         <div className="admin-panel-header compact" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '16px', marginBottom: '16px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
           
