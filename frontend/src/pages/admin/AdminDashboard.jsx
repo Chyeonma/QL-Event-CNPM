@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { adminEventService } from '../../services/adminEventService';
 import {
   Area,
   AreaChart,
@@ -126,6 +127,45 @@ const activities = [
 ];
 
 const AdminDashboard = () => {
+  const [events, setEvents] = useState([]);
+
+  useEffect(() => {
+    adminEventService.getAllEvents().then(setEvents).catch(console.error);
+  }, []);
+
+  const totalEvents = events.length;
+  const totalRegs = events.reduce((sum, e) => sum + (e.totalRegistrations || 0), 0);
+  const totalChecks = events.reduce((sum, e) => sum + (e.checkedInCount || 0), 0);
+
+  const dynamicStats = [
+    { label: 'Tổng sự kiện', value: totalEvents.toString(), change: '+2', trend: 'up', tone: 'indigo', icon: CalendarCheck },
+    { label: 'Người dùng', value: '1,250', change: 'Đang dùng ảo', trend: 'up', tone: 'cyan', icon: Users },
+    { label: 'Lượt đăng ký', value: totalRegs.toString(), change: 'Thực tế', trend: 'up', tone: 'emerald', icon: ClipboardCheck },
+    { label: 'Đã điểm danh', value: totalChecks.toString(), change: 'Thực tế', trend: 'up', tone: 'rose', icon: UserRoundCheck },
+  ];
+
+  const publishedCount = events.filter(e => e.status === 'PUBLISHED').length;
+  const draftCount = events.filter(e => e.status === 'DRAFT').length;
+  const closedCount = events.filter(e => e.status === 'CLOSED').length;
+
+  let dynamicStatusData = [
+    { name: 'Đang mở', value: publishedCount, color: '#4f46e5' },
+    { name: 'Bản nháp', value: draftCount, color: '#38bdf8' },
+    { name: 'Đã đóng', value: closedCount, color: '#10b981' },
+  ].filter(d => d.value > 0);
+  if (dynamicStatusData.length === 0) dynamicStatusData.push({ name: 'Chưa có', value: 1, color: '#e2e8f0' });
+
+  const dynamicRecentEvents = [...events]
+    .sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
+    .slice(0, 4)
+    .map(e => ({
+      title: e.title,
+      status: e.status === 'PUBLISHED' ? 'Đang mở' : e.status === 'DRAFT' ? 'Bản nháp' : 'Đã đóng',
+      date: new Date(e.startTime).toLocaleDateString('vi-VN'),
+      registrations: e.totalRegistrations || 0,
+      capacity: e.capacity || 0
+    }));
+
   return (
     <div className="admin-dashboard">
       <section className="admin-page-header">
@@ -139,7 +179,7 @@ const AdminDashboard = () => {
       </section>
 
       <section className="admin-stats-grid">
-        {stats.map((item) => {
+        {dynamicStats.map((item) => {
           const Icon = item.icon;
           const TrendIcon = item.trend === 'up' ? TrendingUp : TrendingDown;
 
@@ -265,11 +305,11 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {recentEvents.map((event) => (
-                  <tr key={event.title}>
+                {dynamicRecentEvents.length > 0 ? dynamicRecentEvents.map((event, idx) => (
+                  <tr key={idx}>
                     <td>{event.title}</td>
                     <td>
-                      <span className={`admin-status-badge ${event.status.toLowerCase()}`}>
+                      <span className="admin-status-badge">
                         {event.status}
                       </span>
                     </td>
@@ -278,7 +318,11 @@ const AdminDashboard = () => {
                       {event.registrations}/{event.capacity}
                     </td>
                   </tr>
-                ))}
+                )) : (
+                  <tr>
+                    <td colSpan="4" style={{ textAlign: 'center', padding: '20px', color: '#64748b' }}>Chưa có sự kiện nào</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -298,13 +342,13 @@ const AdminDashboard = () => {
                 <Pie
                   cx="50%"
                   cy="50%"
-                  data={statusData}
+                  data={dynamicStatusData}
                   dataKey="value"
                   innerRadius={58}
                   outerRadius={82}
                   paddingAngle={4}
                 >
-                  {statusData.map((entry) => (
+                  {dynamicStatusData.map((entry) => (
                     <Cell fill={entry.color} key={entry.name} />
                   ))}
                 </Pie>

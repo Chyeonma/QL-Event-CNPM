@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { adminEventService } from '../../services/adminEventService';
 import { 
   ArrowLeft, 
   Save, 
@@ -31,6 +32,60 @@ const AdminEventDetail = () => {
   const [activeTab, setActiveTab] = useState('general'); // tabs: 'general', 'targets', 'checkin'
   const [searchStudent, setSearchStudent] = useState('');
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [eventData, setEventData] = useState(null);
+  const [editData, setEditData] = useState(null);
+
+  useEffect(() => {
+    fetchEventDetail();
+  }, [id]);
+
+  const toDateTimeLocal = (dateVal) => {
+    if (!dateVal) return '';
+    const d = Array.isArray(dateVal) 
+      ? new Date(dateVal[0], dateVal[1]-1, dateVal[2], dateVal[3]||0, dateVal[4]||0, dateVal[5]||0)
+      : new Date(dateVal);
+    const pad = (n) => n.toString().padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
+  const fetchEventDetail = async () => {
+    try {
+      const data = await adminEventService.getEventById(id);
+      setEventData(data);
+      setEditData({
+        title: data.title,
+        startTime: toDateTimeLocal(data.startTime),
+        endTime: toDateTimeLocal(data.endTime),
+        location: data.location || '',
+        capacity: data.capacity,
+        trainingPoints: data.trainingPoints,
+        description: data.description || '',
+        status: data.status,
+        targets: data.targets || [],
+        imageUrls: (data.images || []).map(img => img.imageUrl)
+      });
+    } catch (error) {
+      console.error(error);
+      alert("Không tìm thấy sự kiện");
+      navigate('/admin/events');
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+      await adminEventService.updateEvent(id, editData);
+      setIsEditing(false);
+      fetchEventDetail();
+    } catch (error) {
+      console.error(error);
+      alert("Lỗi cập nhật sự kiện");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // Lọc sinh viên theo tên hoặc mã
   const filteredRegistrants = mockRegistrants.filter(
@@ -38,6 +93,10 @@ const AdminEventDetail = () => {
       student.name.toLowerCase().includes(searchStudent.toLowerCase()) ||
       student.code.toLowerCase().includes(searchStudent.toLowerCase())
   );
+
+  if (!eventData || !editData) {
+    return <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>Đang tải dữ liệu sự kiện...</div>;
+  }
 
   return (
     <div className="admin-event-detail-page">
@@ -52,12 +111,14 @@ const AdminEventDetail = () => {
           </button>
           <div>
             <p>Quản lý sự kiện</p>
-            <h1>Hội thảo Nghiên cứu Khoa học N23</h1>
+            <h1>{eventData.title}</h1>
           </div>
         </div>
         
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <span className="admin-status-badge published" style={{ fontSize: '14px', padding: '6px 12px' }}>Đang mở</span>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <span className={`admin-status-badge ${eventData.status.toLowerCase()}`} style={{ fontSize: '14px', padding: '6px 12px' }}>
+            {eventData.status === 'PUBLISHED' ? 'Đang mở' : eventData.status === 'DRAFT' ? 'Bản nháp' : 'Đã đóng'}
+          </span>
           {!isEditing ? (
             <button 
               className="admin-primary-action" 
@@ -73,7 +134,11 @@ const AdminEventDetail = () => {
               <button 
                 className="btn btn-secondary" 
                 type="button"
-                onClick={() => setIsEditing(false)}
+                onClick={() => {
+                  setIsEditing(false);
+                  fetchEventDetail(); // Reset edits
+                }}
+                disabled={isSaving}
                 style={{ background: '#f8fafc', color: '#111827', border: '1px solid #dde5ef', fontWeight: '600' }}
               >
                 Hủy
@@ -81,10 +146,12 @@ const AdminEventDetail = () => {
               <button 
                 className="admin-primary-action" 
                 type="button"
-                onClick={() => setIsEditing(false)}
+                onClick={handleSave}
+                disabled={isSaving}
+                style={{ opacity: isSaving ? 0.7 : 1 }}
               >
                 <Save size={18} style={{ marginRight: '8px' }} />
-                Lưu thay đổi
+                {isSaving ? 'Đang lưu...' : 'Lưu thay đổi'}
               </button>
             </>
           )}
@@ -141,17 +208,17 @@ const AdminEventDetail = () => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <label style={{ fontWeight: '500' }}>Tên sự kiện</label>
-                  <input type="text" disabled={!isEditing} defaultValue="Hội thảo Nghiên cứu Khoa học N23" style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', cursor: isEditing ? 'text' : 'not-allowed' }} />
+                  <input type="text" disabled={!isEditing} value={editData.title} onChange={e => setEditData({...editData, title: e.target.value})} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', cursor: isEditing ? 'text' : 'not-allowed' }} />
                 </div>
                 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <label style={{ fontWeight: '500' }}>Bắt đầu</label>
-                    <input type="datetime-local" disabled={!isEditing} defaultValue="2026-06-24T08:00" style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', cursor: isEditing ? 'text' : 'not-allowed' }} />
+                    <input type="datetime-local" disabled={!isEditing} value={editData.startTime} onChange={e => setEditData({...editData, startTime: e.target.value})} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', cursor: isEditing ? 'text' : 'not-allowed' }} />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <label style={{ fontWeight: '500' }}>Kết thúc</label>
-                    <input type="datetime-local" disabled={!isEditing} defaultValue="2026-06-24T11:30" style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', cursor: isEditing ? 'text' : 'not-allowed' }} />
+                    <input type="datetime-local" disabled={!isEditing} value={editData.endTime} onChange={e => setEditData({...editData, endTime: e.target.value})} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', cursor: isEditing ? 'text' : 'not-allowed' }} />
                   </div>
                 </div>
 
@@ -160,23 +227,34 @@ const AdminEventDetail = () => {
                     <label style={{ fontWeight: '500' }}>Địa điểm</label>
                     <div style={{ display: 'flex', alignItems: 'center', background: isEditing ? '#ffffff' : '#f8fafc', border: '1px solid #dde5ef', borderRadius: '8px', padding: '0 12px', cursor: isEditing ? 'text' : 'not-allowed' }}>
                       <MapPin size={18} color="#6b7280" />
-                      <input type="text" disabled={!isEditing} defaultValue="Hội trường A1" style={{ flex: 1, padding: '12px', border: 'none', background: 'transparent', color: '#111827', outline: 'none', cursor: isEditing ? 'text' : 'not-allowed' }} />
+                      <input type="text" disabled={!isEditing} value={editData.location} onChange={e => setEditData({...editData, location: e.target.value})} style={{ flex: 1, padding: '12px', border: 'none', background: 'transparent', color: '#111827', outline: 'none', cursor: isEditing ? 'text' : 'not-allowed' }} />
                     </div>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <label style={{ fontWeight: '500' }}>Sức chứa (Capacity)</label>
-                    <input type="number" disabled={!isEditing} defaultValue="120" style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', cursor: isEditing ? 'text' : 'not-allowed' }} />
+                    <label style={{ fontWeight: '500' }}>Sức chứa</label>
+                    <input type="number" disabled={!isEditing} value={editData.capacity} onChange={e => setEditData({...editData, capacity: parseInt(e.target.value)})} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', cursor: isEditing ? 'text' : 'not-allowed' }} />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <label style={{ fontWeight: '500' }}>Điểm rèn luyện</label>
-                    <input type="number" disabled={!isEditing} defaultValue="5" style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', cursor: isEditing ? 'text' : 'not-allowed' }} />
+                    <input type="number" disabled={!isEditing} value={editData.trainingPoints} onChange={e => setEditData({...editData, trainingPoints: parseInt(e.target.value)})} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', cursor: isEditing ? 'text' : 'not-allowed' }} />
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <label style={{ fontWeight: '500' }}>Mô tả chi tiết</label>
-                  <textarea rows="4" disabled={!isEditing} defaultValue="Hội thảo thường niên dành cho sinh viên N23 nhằm định hướng và cung cấp kỹ năng NCKH..." style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', resize: 'vertical', cursor: isEditing ? 'text' : 'not-allowed' }}></textarea>
+                  <textarea rows="4" disabled={!isEditing} value={editData.description} onChange={e => setEditData({...editData, description: e.target.value})} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', resize: 'vertical', cursor: isEditing ? 'text' : 'not-allowed' }}></textarea>
                 </div>
+                
+                {isEditing && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ fontWeight: '500' }}>Trạng thái sự kiện</label>
+                    <select value={editData.status} onChange={e => setEditData({...editData, status: e.target.value})} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: '#ffffff', color: '#111827' }}>
+                      <option value="DRAFT">Lưu nháp (DRAFT)</option>
+                      <option value="PUBLISHED">Đang mở (PUBLISHED)</option>
+                      <option value="CLOSED">Đã đóng (CLOSED)</option>
+                    </select>
+                  </div>
+                )}
               </div>
 
               {/* CỘT PHẢI: QUẢN LÝ HÌNH ẢNH */}
