@@ -13,6 +13,7 @@ import Profile from './pages/Profile';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminEvents from './pages/admin/AdminEvents';
 import AdminEventDetail from './pages/admin/AdminEventDetail';
+import AdminUsers from './pages/admin/AdminUsers';
 
 function App() {
   return (
@@ -88,6 +89,16 @@ function App() {
               <AdminRoute>
                 <AdminLayout>
                   <AdminEventDetail />
+                </AdminLayout>
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/users/:role"
+            element={
+              <AdminRoute>
+                <AdminLayout>
+                  <AdminUsers />
                 </AdminLayout>
               </AdminRoute>
             }

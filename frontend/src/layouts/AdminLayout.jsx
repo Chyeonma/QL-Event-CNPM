@@ -27,7 +27,15 @@ const menuSections = [
       { label: 'Dashboard', icon: LayoutDashboard, to: '/admin' },
       { label: 'Sự kiện', icon: CalendarDays, to: '/admin/events' },
       { label: 'Đăng ký', icon: ClipboardCheck },
-      { label: 'Người dùng', icon: Users },
+      { 
+        label: 'Người dùng', 
+        icon: Users, 
+        children: [
+          { label: 'Sinh viên', to: '/admin/users/student' },
+          { label: 'Manager', to: '/admin/users/manager' },
+          { label: 'Admin', to: '/admin/users/admin' },
+        ]
+      },
       { label: 'Báo cáo', icon: ChartNoAxesCombined },
     ],
   },
@@ -54,6 +62,10 @@ const AdminLayout = ({ children }) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return localStorage.getItem('adminTheme') === 'dark';
   });
+  
+  // Trạng thái mở/đóng của menu thả xuống
+  const [openMenus, setOpenMenus] = useState({ 'Người dùng': true });
+  const toggleMenu = (label) => setOpenMenus(prev => ({ ...prev, [label]: !prev[label] }));
 
   useEffect(() => {
     if (isDarkMode) {
@@ -101,6 +113,43 @@ const AdminLayout = ({ children }) => {
                       {!item.to && !item.badge && <ChevronDown size={17} />}
                     </>
                   );
+
+                  if (item.children) {
+                    const isOpen = openMenus[item.label];
+                    return (
+                      <div key={item.label}>
+                        <button 
+                          className={`admin-sidebar-link ${isOpen ? 'active-parent' : ''}`} 
+                          type="button" 
+                          onClick={() => toggleMenu(item.label)}
+                          style={{ background: isOpen ? 'var(--bg-secondary)' : 'transparent' }}
+                        >
+                          <span className="admin-sidebar-link-main">
+                            <Icon size={19} />
+                            <span>{item.label}</span>
+                          </span>
+                          <ChevronDown size={17} style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: '0.2s' }} />
+                        </button>
+                        {isOpen && (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
+                            {item.children.map(child => (
+                              <NavLink 
+                                key={child.label} 
+                                to={child.to}
+                                className={({ isActive }) => `admin-sidebar-link${isActive ? ' active' : ''}`}
+                                style={{ padding: '8px 12px', paddingLeft: '44px', fontSize: '14px', minHeight: '36px' }}
+                              >
+                                <span className="admin-sidebar-link-main" style={{ gap: '12px' }}>
+                                  <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'currentColor', opacity: 0.5 }} />
+                                  <span>{child.label}</span>
+                                </span>
+                              </NavLink>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
 
                   if (item.to) {
                     return (
