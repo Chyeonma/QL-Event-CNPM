@@ -5,6 +5,7 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import PublicRoute from './routes/PublicRoute';
 import AdminRoute from './routes/AdminRoute';
 import AdminLayout from './layouts/AdminLayout';
+import StudentLayout from './layouts/StudentLayout';
 import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import Home from './pages/Home';
@@ -14,13 +15,18 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminEvents from './pages/admin/AdminEvents';
 import AdminEventDetail from './pages/admin/AdminEventDetail';
 import AdminUsers from './pages/admin/AdminUsers';
+import StudentDashboard from './pages/student/StudentDashboard';
+import ExploreEvents from './pages/student/ExploreEvents';
+import StudentEventDetail from './pages/student/StudentEventDetail';
 
 function App() {
   return (
     <Router>
       <AuthProvider>
         <Routes>
-          {/* Public Routes: Cho phép truy cập khi chưa đăng nhập */}
+          {/* Public Routes */}
+          <Route path="/" element={<Home />} />
+          
           <Route
             path="/login"
             element={
@@ -38,12 +44,34 @@ function App() {
             }
           />
 
-          {/* Protected Routes: Bắt buộc đăng nhập */}
+          {/* Student/General Protected Routes */}
           <Route
-            path="/"
+            path="/dashboard"
             element={
               <ProtectedRoute>
-                <Home />
+                <StudentLayout>
+                  <StudentDashboard />
+                </StudentLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/explore"
+            element={
+              <ProtectedRoute>
+                <StudentLayout>
+                  <ExploreEvents />
+                </StudentLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/explore/:id"
+            element={
+              <ProtectedRoute>
+                <StudentLayout>
+                  <StudentEventDetail />
+                </StudentLayout>
               </ProtectedRoute>
             }
           />
@@ -51,7 +79,9 @@ function App() {
             path="/profile"
             element={
               <ProtectedRoute>
-                <Profile />
+                <StudentLayout>
+                  <Profile />
+                </StudentLayout>
               </ProtectedRoute>
             }
           />
@@ -63,6 +93,8 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* Admin Protected Routes */}
           <Route
             path="/admin"
             element={
@@ -104,7 +136,7 @@ function App() {
             }
           />
 
-          {/* Fallback điều hướng */}
+          {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>

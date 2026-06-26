@@ -6,7 +6,7 @@ import com.project.event.dto.EventResponse;
 import java.util.List;
 import java.util.UUID;
 
-public interface EventService {
+public interface AdminEventService {
     // 1. Quản lý chung
     EventResponse createEvent(EventRequest request, UUID creatorId);
     EventResponse updateEvent(UUID eventId, EventRequest request);

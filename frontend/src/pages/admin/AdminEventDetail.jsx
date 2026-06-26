@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { adminEventService } from '../../services/adminEventService';
+import { adminRegistrationService } from '../../services/adminRegistrationService';
 import { 
   ArrowLeft, 
   Save, 
@@ -18,14 +19,6 @@ import {
   Trash2
 } from 'lucide-react';
 
-// Mock data sinh viên đăng ký
-const mockRegistrants = [
-  { id: 101, code: 'B22DCCN123', name: 'Nguyễn Văn A', clazz: 'D22CQCN01-B', time: '20/06/2026 09:15', checkedIn: true },
-  { id: 102, code: 'B22DCCN456', name: 'Trần Thị B', clazz: 'D22CQCN02-B', time: '21/06/2026 14:20', checkedIn: false },
-  { id: 103, code: 'B23DCAT001', name: 'Lê Hoàng C', clazz: 'D23CQAT01-B', time: '22/06/2026 08:00', checkedIn: false },
-  { id: 104, code: 'B21DCVT999', name: 'Phạm Minh D', clazz: 'D21CQVT01-B', time: '19/06/2026 21:45', checkedIn: true },
-];
-
 const AdminEventDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -36,10 +29,59 @@ const AdminEventDetail = () => {
 
   const [eventData, setEventData] = useState(null);
   const [editData, setEditData] = useState(null);
+  const [newImageUrl, setNewImageUrl] = useState('');
+  const [registrations, setRegistrations] = useState([]);
+
+  const handleAddImageUrl = () => {
+    if (!newImageUrl || !newImageUrl.trim()) return;
+    setEditData({
+      ...editData,
+      imageUrls: [...(editData.imageUrls || []), newImageUrl.trim()]
+    });
+    setNewImageUrl('');
+  };
+
+  const handleRemoveImageUrl = (idxToRemove) => {
+    setEditData({
+      ...editData,
+      imageUrls: (editData.imageUrls || []).filter((_, idx) => idx !== idxToRemove)
+    });
+  };
 
   useEffect(() => {
     fetchEventDetail();
+    fetchRegistrations();
   }, [id]);
+
+  const fetchRegistrations = async () => {
+    try {
+      const data = await adminRegistrationService.getEventRegistrations(id);
+      setRegistrations(data || []);
+    } catch (err) {
+      console.error("Lỗi tải danh sách đăng ký:", err);
+    }
+  };
+
+  const handleManualCheckIn = async (regId) => {
+    try {
+      await adminRegistrationService.manualCheckIn(regId);
+      fetchRegistrations();
+      fetchEventDetail();
+    } catch (err) {
+      alert(err.response?.data?.message || err.message || "Lỗi điểm danh");
+    }
+  };
+
+  const handleCancelReg = async (regId) => {
+    if (!window.confirm("Bạn có chắc chắn muốn hủy suất đăng ký tham gia này của sinh viên?")) return;
+    try {
+      await adminRegistrationService.cancelRegistration(regId);
+      fetchRegistrations();
+      fetchEventDetail();
+    } catch (err) {
+      alert(err.response?.data?.message || err.message || "Lỗi hủy suất");
+    }
+  };
 
   const toDateTimeLocal = (dateVal) => {
     if (!dateVal) return '';
@@ -88,10 +130,11 @@ const AdminEventDetail = () => {
   };
 
   // Lọc sinh viên theo tên hoặc mã
-  const filteredRegistrants = mockRegistrants.filter(
+  const filteredRegistrants = registrations.filter(
     (student) =>
-      student.name.toLowerCase().includes(searchStudent.toLowerCase()) ||
-      student.code.toLowerCase().includes(searchStudent.toLowerCase())
+      (student.fullName || '').toLowerCase().includes(searchStudent.toLowerCase()) ||
+      (student.studentCode || '').toLowerCase().includes(searchStudent.toLowerCase()) ||
+      (student.email || '').toLowerCase().includes(searchStudent.toLowerCase())
   );
 
   if (!eventData || !editData) {
@@ -201,102 +244,143 @@ const AdminEventDetail = () => {
 
         <div style={{ padding: '24px' }}>
           
-          {/* TAB 1: THÔNG TIN CHUNG */}
+          {/* TAB 1: THÔNG TIN CHUNG (TRẢI DÀI TOÀN MÀN HÌNH) */}
           {activeTab === 'general' && (
-            <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: '40px', opacity: isEditing ? 1 : 0.85 }}>
-              {/* CỘT TRÁI: FORM NHẬP LIỆU */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', opacity: isEditing ? 1 : 0.85 }}>
+              {/* PHẦN 1: THÔNG TIN CƠ BẢN */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontWeight: '500' }}>Tên sự kiện</label>
-                  <input type="text" disabled={!isEditing} value={editData.title} onChange={e => setEditData({...editData, title: e.target.value})} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', cursor: isEditing ? 'text' : 'not-allowed' }} />
+                  <label style={{ fontWeight: '600', fontSize: '14px', color: '#334155' }}>Tên sự kiện</label>
+                  <input type="text" disabled={!isEditing} value={editData.title} onChange={e => setEditData({...editData, title: e.target.value})} style={{ padding: '12px 16px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#0f172a', fontSize: '16px', fontWeight: '600', cursor: isEditing ? 'text' : 'not-allowed' }} />
                 </div>
                 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <label style={{ fontWeight: '500' }}>Bắt đầu</label>
-                    <input type="datetime-local" disabled={!isEditing} value={editData.startTime} onChange={e => setEditData({...editData, startTime: e.target.value})} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', cursor: isEditing ? 'text' : 'not-allowed' }} />
+                    <label style={{ fontWeight: '600', fontSize: '14px', color: '#334155' }}>Thời gian bắt đầu</label>
+                    <input type="datetime-local" disabled={!isEditing} value={editData.startTime} onChange={e => setEditData({...editData, startTime: e.target.value})} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#0f172a', cursor: isEditing ? 'text' : 'not-allowed' }} />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <label style={{ fontWeight: '500' }}>Kết thúc</label>
-                    <input type="datetime-local" disabled={!isEditing} value={editData.endTime} onChange={e => setEditData({...editData, endTime: e.target.value})} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', cursor: isEditing ? 'text' : 'not-allowed' }} />
+                    <label style={{ fontWeight: '600', fontSize: '14px', color: '#334155' }}>Thời gian kết thúc</label>
+                    <input type="datetime-local" disabled={!isEditing} value={editData.endTime} onChange={e => setEditData({...editData, endTime: e.target.value})} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#0f172a', cursor: isEditing ? 'text' : 'not-allowed' }} />
                   </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <label style={{ fontWeight: '500' }}>Địa điểm</label>
+                    <label style={{ fontWeight: '600', fontSize: '14px', color: '#334155' }}>Địa điểm tổ chức</label>
                     <div style={{ display: 'flex', alignItems: 'center', background: isEditing ? '#ffffff' : '#f8fafc', border: '1px solid #dde5ef', borderRadius: '8px', padding: '0 12px', cursor: isEditing ? 'text' : 'not-allowed' }}>
                       <MapPin size={18} color="#6b7280" />
-                      <input type="text" disabled={!isEditing} value={editData.location} onChange={e => setEditData({...editData, location: e.target.value})} style={{ flex: 1, padding: '12px', border: 'none', background: 'transparent', color: '#111827', outline: 'none', cursor: isEditing ? 'text' : 'not-allowed' }} />
+                      <input type="text" disabled={!isEditing} value={editData.location} onChange={e => setEditData({...editData, location: e.target.value})} style={{ flex: 1, padding: '12px', border: 'none', background: 'transparent', color: '#0f172a', outline: 'none', cursor: isEditing ? 'text' : 'not-allowed' }} />
                     </div>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <label style={{ fontWeight: '500' }}>Sức chứa</label>
-                    <input type="number" disabled={!isEditing} value={editData.capacity} onChange={e => setEditData({...editData, capacity: parseInt(e.target.value)})} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', cursor: isEditing ? 'text' : 'not-allowed' }} />
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <label style={{ fontWeight: '500' }}>Điểm rèn luyện</label>
-                    <input type="number" disabled={!isEditing} value={editData.trainingPoints} onChange={e => setEditData({...editData, trainingPoints: parseInt(e.target.value)})} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', cursor: isEditing ? 'text' : 'not-allowed' }} />
-                  </div>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontWeight: '500' }}>Mô tả chi tiết</label>
-                  <textarea rows="4" disabled={!isEditing} value={editData.description} onChange={e => setEditData({...editData, description: e.target.value})} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#111827', resize: 'vertical', cursor: isEditing ? 'text' : 'not-allowed' }}></textarea>
-                </div>
-                
-                {isEditing && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <label style={{ fontWeight: '500' }}>Trạng thái sự kiện</label>
-                    <select value={editData.status} onChange={e => setEditData({...editData, status: e.target.value})} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: '#ffffff', color: '#111827' }}>
-                      <option value="DRAFT">Lưu nháp (DRAFT)</option>
-                      <option value="PUBLISHED">Đang mở (PUBLISHED)</option>
-                      <option value="CLOSED">Đã đóng (CLOSED)</option>
-                    </select>
+                    <label style={{ fontWeight: '600', fontSize: '14px', color: '#334155' }}>Sức chứa tối đa</label>
+                    <input type="number" disabled={!isEditing} value={editData.capacity} onChange={e => setEditData({...editData, capacity: parseInt(e.target.value) || 0})} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#0f172a', cursor: isEditing ? 'text' : 'not-allowed' }} />
                   </div>
-                )}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ fontWeight: '600', fontSize: '14px', color: '#334155' }}>Điểm rèn luyện (+ĐRL)</label>
+                    <input type="number" disabled={!isEditing} value={editData.trainingPoints} onChange={e => setEditData({...editData, trainingPoints: parseInt(e.target.value) || 0})} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#0f172a', cursor: isEditing ? 'text' : 'not-allowed' }} />
+                  </div>
+                  {isEditing ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <label style={{ fontWeight: '600', fontSize: '14px', color: '#334155' }}>Trạng thái sự kiện</label>
+                      <select value={editData.status} onChange={e => setEditData({...editData, status: e.target.value})} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: '#ffffff', color: '#0f172a', fontWeight: '600' }}>
+                        <option value="DRAFT">Lưu nháp (DRAFT)</option>
+                        <option value="PUBLISHED">Đang mở (PUBLISHED)</option>
+                        <option value="CLOSED">Đã đóng (CLOSED)</option>
+                      </select>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <label style={{ fontWeight: '600', fontSize: '14px', color: '#334155' }}>Trạng thái</label>
+                      <div style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dde5ef', background: '#f8fafc', fontWeight: '700', color: editData.status === 'PUBLISHED' ? '#10b981' : editData.status === 'DRAFT' ? '#64748b' : '#ef4444' }}>
+                        {editData.status === 'PUBLISHED' ? 'Đang mở đăng ký' : editData.status === 'DRAFT' ? 'Bản thảo nháp' : 'Đã đóng / Kết thúc'}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* CỘT PHẢI: QUẢN LÝ HÌNH ẢNH */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <label style={{ fontWeight: '500' }}>Hình ảnh sự kiện</label>
-                <div style={{ 
-                  border: '2px dashed #dde5ef', 
-                  borderRadius: '12px', 
-                  padding: '40px 20px', 
-                  textAlign: 'center',
-                  background: isEditing ? '#f8fafc' : '#ffffff',
-                  cursor: isEditing ? 'pointer' : 'not-allowed',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '12px'
-                }}>
-                  <ImagePlus size={36} color="#94a3b8" />
+              {/* PHẦN 2: MÔ TẢ CHI TIẾT */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px solid #dde5ef', paddingTop: '24px' }}>
+                <label style={{ fontWeight: '600', fontSize: '16px', color: '#0f172a' }}>Mô tả nội dung chi tiết</label>
+                <textarea 
+                  rows={isEditing ? 12 : 8} 
+                  disabled={!isEditing} 
+                  value={editData.description} 
+                  onChange={e => setEditData({...editData, description: e.target.value})} 
+                  placeholder="Nhập nội dung chương trình, thể lệ, khách mời..."
+                  style={{ padding: '16px', borderRadius: '12px', border: '1px solid #dde5ef', background: isEditing ? '#ffffff' : '#f8fafc', color: '#0f172a', fontSize: '14px', lineHeight: '1.7', resize: 'vertical', cursor: isEditing ? 'text' : 'default' }}
+                ></textarea>
+              </div>
+
+              {/* PHẦN 3: QUẢN LÝ HÌNH ẢNH MINH HỌA */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', borderTop: '1px solid #dde5ef', paddingTop: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                   <div>
-                    <strong style={{ color: '#4f46e5', display: 'block', marginBottom: '4px' }}>Click để tải ảnh lên</strong>
-                    <span style={{ color: '#6b7280', fontSize: '13px' }}>Chỉ hỗ trợ JPG, PNG (Tối đa 5MB)</span>
+                    <label style={{ fontWeight: '600', fontSize: '16px', color: '#0f172a', display: 'block' }}>Hình ảnh minh họa</label>
+                    <span style={{ fontSize: '13px', color: '#64748b' }}>Danh sách các đường dẫn URL hình ảnh hiển thị trên slider và thẻ sự kiện</span>
                   </div>
+
+                  {isEditing && (
+                    <div style={{ display: 'flex', gap: '8px', flex: 1, maxWidth: '500px', minWidth: '280px' }}>
+                      <input 
+                        type="text" 
+                        placeholder="Dán link đường dẫn ảnh (VD: https://imgur.com/...)" 
+                        value={newImageUrl}
+                        onChange={e => setNewImageUrl(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddImageUrl())}
+                        style={{ flex: 1, padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '13px' }}
+                      />
+                      <button 
+                        type="button"
+                        onClick={handleAddImageUrl}
+                        className="btn btn-primary"
+                        style={{ background: 'var(--primary-color)', color: '#fff', border: 'none', padding: '10px 16px', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}
+                      >
+                        <ImagePlus size={16} /> Thêm ảnh
+                      </button>
+                    </div>
+                  )}
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <div style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', border: '1px solid #dde5ef', aspectRatio: '16/9' }}>
-                    <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500&q=80" alt="event" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    {isEditing && (
-                      <button style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', borderRadius: '4px', padding: '6px', cursor: 'pointer' }}>
-                        <Trash2 size={14} />
-                      </button>
-                    )}
-                  </div>
-                  <div style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', border: '1px solid #dde5ef', aspectRatio: '16/9' }}>
-                    <img src="https://images.unsplash.com/photo-1515169067868-5387ec356754?w=500&q=80" alt="event" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    {isEditing && (
-                      <button style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', borderRadius: '4px', padding: '6px', cursor: 'pointer' }}>
-                        <Trash2 size={14} />
-                      </button>
-                    )}
-                  </div>
-                </div>
+                {/* Lưới hình ảnh rộng rãi toàn màn hình */}
+                {(() => {
+                  const currentUrls = isEditing ? (editData.imageUrls || []) : (eventData.images || []).map(i => i.imageUrl);
+                  
+                  if (currentUrls.length === 0) {
+                    return (
+                      <div style={{ border: '2px dashed #dde5ef', borderRadius: '12px', padding: '48px 20px', textAlign: 'center', background: '#f8fafc' }}>
+                        <ImagePlus size={40} color="#94a3b8" style={{ margin: '0 auto 12px' }} />
+                        <p style={{ fontWeight: '600', color: '#475569', marginBottom: '4px' }}>Chưa có hình ảnh minh họa nào</p>
+                        <p style={{ fontSize: '13px', color: '#94a3b8' }}>{isEditing ? 'Hãy dán đường link URL phía trên để thêm ảnh vào sự kiện.' : 'Sự kiện này đang sử dụng ảnh mặc định của hệ thống.'}</p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px', marginTop: '8px' }}>
+                      {currentUrls.map((url, idx) => (
+                        <div key={idx} style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', border: '1px solid #dde5ef', aspectRatio: '16/9', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', background: '#f1f5f9' }}>
+                          <img src={url} alt={`Minh họa ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=600&q=80'; }} />
+                          {isEditing && (
+                            <button 
+                              type="button"
+                              onClick={() => handleRemoveImageUrl(idx)}
+                              title="Xóa ảnh này"
+                              style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', borderRadius: '6px', padding: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          )}
+                          <span style={{ position: 'absolute', bottom: '8px', left: '8px', background: 'rgba(15, 23, 42, 0.7)', color: 'white', fontSize: '11px', padding: '2px 8px', borderRadius: '4px' }}>
+                            Ảnh #{idx + 1}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           )}
@@ -382,43 +466,54 @@ const AdminEventDetail = () => {
                       <th>Lớp</th>
                       <th>Thời gian đăng ký</th>
                       <th>Trạng thái</th>
-                      <th style={{ textAlign: 'right' }}>Điểm danh</th>
+                      <th style={{ textAlign: 'right' }}>Thao tác</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredRegistrants.map((student, index) => (
-                      <tr key={student.id}>
+                      <tr key={student.id} style={{ opacity: student.status === 'CANCELLED' ? 0.5 : 1 }}>
                         <td>{index + 1}</td>
                         <td>
-                          <div style={{ fontWeight: '600', color: '#111827' }}>{student.name}</div>
-                          <div style={{ fontSize: '13px', color: '#6b7280' }}>{student.code}</div>
+                          <div style={{ fontWeight: '600', color: '#111827' }}>{student.fullName}</div>
+                          <div style={{ fontSize: '13px', color: '#6b7280' }}>{student.studentCode}</div>
                         </td>
-                        <td>{student.clazz}</td>
-                        <td style={{ color: '#6b7280' }}>{student.time}</td>
+                        <td>{student.classCode}</td>
+                        <td style={{ color: '#6b7280' }}>
+                          {student.registeredAt ? new Date(student.registeredAt).toLocaleString('vi-VN') : ''}
+                        </td>
                         <td>
-                          {student.checkedIn ? (
-                            <span style={{ color: 'var(--primary-color)', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          {student.status === 'CANCELLED' ? (
+                            <span style={{ color: '#ef4444', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <UserX size={16} /> Đã hủy suất
+                            </span>
+                          ) : student.checkedInAt ? (
+                            <span style={{ color: '#10b981', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
                               <UserCheck size={16} /> Đã đến
                             </span>
                           ) : (
-                            <span style={{ color: '#6b7280', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              Chờ check-in
+                            <span style={{ color: '#f59e0b', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <Clock size={16} /> Chờ check-in
                             </span>
                           )}
                         </td>
                         <td style={{ textAlign: 'right' }}>
-                          {student.checkedIn ? (
-                            <button 
-                              style={{ background: '#f8fafc', color: 'var(--danger-color)', border: '1px solid #dde5ef', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '500' }}
-                            >
-                              Hủy điểm danh
-                            </button>
-                          ) : (
-                            <button 
-                              style={{ background: 'var(--primary-color)', color: '#fff', border: 'none', padding: '6px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '500', boxShadow: '0 2px 4px rgba(79, 70, 229, 0.2)' }}
-                            >
-                              Điểm danh
-                            </button>
+                          {student.status !== 'CANCELLED' && (
+                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                              {!student.checkedInAt && (
+                                <button 
+                                  onClick={() => handleManualCheckIn(student.id)}
+                                  style={{ background: 'var(--primary-color)', color: '#fff', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', boxShadow: '0 2px 4px rgba(79, 70, 229, 0.2)' }}
+                                >
+                                  Điểm danh
+                                </button>
+                              )}
+                              <button 
+                                onClick={() => handleCancelReg(student.id)}
+                                style={{ background: '#fef2f2', color: '#ef4444', border: '1px solid #fca5a5', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}
+                              >
+                                Hủy suất
+                              </button>
+                            </div>
                           )}
                         </td>
                       </tr>
@@ -426,7 +521,7 @@ const AdminEventDetail = () => {
                     {filteredRegistrants.length === 0 && (
                       <tr>
                         <td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-secondary)' }}>
-                          Không tìm thấy sinh viên nào khớp với từ khóa "{searchStudent}".
+                          Không tìm thấy sinh viên nào khớp với tìm kiếm "{searchStudent}".
                         </td>
                       </tr>
                     )}

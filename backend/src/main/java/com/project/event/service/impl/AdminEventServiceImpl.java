@@ -11,7 +11,7 @@ import com.project.event.entity.User;
 import com.project.event.repository.EventRepository;
 import com.project.event.repository.RegistrationRepository;
 import com.project.event.repository.UserRepository;
-import com.project.event.service.EventService;
+import com.project.event.service.AdminEventService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class EventServiceImpl implements EventService {
+public class AdminEventServiceImpl implements AdminEventService {
 
     private final EventRepository eventRepository;
     private final RegistrationRepository registrationRepository;

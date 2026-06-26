@@ -37,6 +37,7 @@ const AdminEvents = () => {
   const [draftTrainingPoints, setDraftTrainingPoints] = useState(0);
   const [draftDescription, setDraftDescription] = useState('');
   const [draftStatus, setDraftStatus] = useState('DRAFT');
+  const [draftImageUrl, setDraftImageUrl] = useState('');
 
   const fetchEvents = async () => {
     try {
@@ -66,7 +67,8 @@ const AdminEvents = () => {
         capacity: draftCapacity || 0,
         trainingPoints: draftTrainingPoints || 0,
         description: draftDescription,
-        status: draftStatus
+        status: draftStatus,
+        imageUrls: draftImageUrl && draftImageUrl.trim() !== '' ? [draftImageUrl.trim()] : []
       };
       const created = await adminEventService.createEvent(newEvent);
       setShowCreateModal(false);
@@ -395,6 +397,11 @@ const AdminEvents = () => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <label style={{ fontWeight: '600', fontSize: '14px', color: '#334155' }}>Mô tả ngắn</label>
                 <textarea rows="3" value={draftDescription} onChange={e => setDraftDescription(e.target.value)} placeholder="Tóm tắt sự kiện..." style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px', color: '#0f172a', resize: 'vertical' }}></textarea>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <label style={{ fontWeight: '600', fontSize: '14px', color: '#334155' }}>Đường dẫn ảnh minh họa (URL)</label>
+                <input type="text" value={draftImageUrl} onChange={e => setDraftImageUrl(e.target.value)} placeholder="https://images.unsplash.com/..." style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px', color: '#0f172a' }} />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>

@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import axiosInstance from '../config/axios';
+import { User, Mail, BookOpen, GraduationCap, Award, ShieldCheck, Key, Lock, CheckCircle2, Calendar, X } from 'lucide-react';
 
 const Profile = () => {
-  const { user, logout, changePassword } = useAuth();
-  const navigate = useNavigate();
+  const { user, changePassword } = useAuth();
   const [showModal, setShowModal] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -13,10 +11,6 @@ const Profile = () => {
   const [modalError, setModalError] = useState('');
   const [modalSuccess, setModalSuccess] = useState('');
   const [modalLoading, setModalLoading] = useState(false);
-
-  // Dùng để test tính năng Auto-Refresh token bằng cách cố tình gửi request với token cũ/hết hạn
-  const [apiTestResponse, setApiTestResponse] = useState('');
-  const [apiTestLoading, setApiTestLoading] = useState(false);
 
   const handleOpenModal = () => {
     setCurrentPassword('');
@@ -37,12 +31,12 @@ const Profile = () => {
     setModalSuccess('');
 
     if (newPassword !== confirmPassword) {
-      setModalError('Mật khẩu mới xác nhận không khớp');
+      setModalError('Mật khẩu xác nhận không khớp!');
       return;
     }
 
     if (newPassword === currentPassword) {
-      setModalError('Mật khẩu mới không được trùng mật khẩu cũ');
+      setModalError('Mật khẩu mới không được trùng mật khẩu cũ!');
       return;
     }
 
@@ -52,7 +46,6 @@ const Profile = () => {
 
     if (result.success) {
       setModalSuccess(result.message);
-      // Chờ 2 giây rồi đóng modal và tự động logout
       setTimeout(() => {
         handleCloseModal();
       }, 2000);
@@ -61,161 +54,156 @@ const Profile = () => {
     }
   };
 
-  // Test gửi một request an toàn đến Backend để xem API trả về tốt không
-  const handleTestApi = async () => {
-    setApiTestLoading(true);
-    setApiTestResponse('');
-    try {
-      const response = await axiosInstance.get('/api/auth/me');
-      setApiTestResponse(JSON.stringify(response.data, null, 2));
-    } catch (error) {
-      setApiTestResponse(`Lỗi: ${error.response?.data?.message || error.message}`);
-    } finally {
-      setApiTestLoading(false);
-    }
-  };
-
-  // Test tự động gia hạn token (Tải access token giả để kích hoạt lỗi 401 xem Axios có cứu được không)
-  const handleCorruptTokenTest = () => {
-    alert("Hệ thống sẽ thay thế Access Token hiện tại bằng một Token lỗi. Vui lòng nhấn nút 'Gọi API Kiểm tra' ngay sau đây để xem Axios có tự động dùng Refresh Token lấy lại Token mới hay không.");
-    localStorage.setItem('accessToken', 'invalid-jwt-token-to-simulate-401');
-  };
-
   return (
-    <div className="dashboard-container">
-      <header className="dashboard-header">
-        <div className="header-left" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <img
-            src={user?.avatarUrl || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'}
-            alt="Avatar"
-            className="header-avatar"
-            onClick={() => navigate('/')}
-            style={{ cursor: 'pointer', width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary-color)' }}
-          />
-          <h1 onClick={() => navigate('/')} style={{ cursor: 'pointer', fontSize: '20px', fontWeight: '700', background: 'linear-gradient(to right, #818cf8, #c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            HVCS Events
-          </h1>
+    <div className="stu-page" style={{ padding: '10px 0' }}>
+      {/* Tiêu đề trang */}
+      <div className="stu-card-header" style={{ padding: 0, border: 'none', marginBottom: '28px', background: 'transparent' }}>
+        <div>
+          <h2 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '8px', color: 'var(--edu-text)' }}>
+            Hồ sơ Cá nhân
+          </h2>
+          <p className="stu-text-muted">
+            Quản lý thông tin định danh sinh viên và cấu hình bảo mật tài khoản.
+          </p>
         </div>
-        <div className="header-actions">
-          <button className="btn btn-secondary" onClick={() => navigate('/')}>
-            Trang chủ
-          </button>
-          <button className="btn btn-danger" onClick={logout}>
-            Đăng xuất
-          </button>
-        </div>
-      </header>
+      </div>
 
-      <main className="dashboard-content">
-        <div className="welcome-banner">
-          <h2>Trang cá nhân của bạn 👤</h2>
-          <p>Quản lý thông tin tài khoản và cấu hình bảo mật.</p>
+      {/* Bố cục 2 cột đồng bộ chuẩn theme EduCampus */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '28px', alignItems: 'start' }}>
+        {/* Cột trái: Card Tóm tắt Sinh viên */}
+        <div className="stu-card" style={{ textAlign: 'center', padding: '36px 24px' }}>
+          <div style={{ position: 'relative', display: 'inline-block', marginBottom: '16px' }}>
+            <img
+              src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.fullName || 'User')}&background=10b981&color=fff&size=140`}
+              alt="Avatar"
+              style={{ width: '120px', height: '120px', borderRadius: '50%', objectFit: 'cover', border: '4px solid #f1f5f9', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }}
+            />
+            <span 
+              style={{ position: 'absolute', bottom: '4px', right: '4px', background: '#10b981', color: '#fff', borderRadius: '50%', padding: '4px', display: 'flex', border: '3px solid #fff', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }} 
+              title="Tài khoản đã xác thực"
+            >
+              <CheckCircle2 size={16} />
+            </span>
+          </div>
+
+          <h3 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--edu-text)', marginBottom: '8px' }}>
+            {user?.fullName}
+          </h3>
+          <span style={{ display: 'inline-block', background: '#eff6ff', color: 'var(--edu-primary)', fontSize: '12px', fontWeight: 700, padding: '4px 14px', borderRadius: '20px', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '24px' }}>
+            {user?.role || 'STUDENT'}
+          </span>
+
+          <div style={{ borderTop: '1px solid var(--edu-border)', paddingTop: '20px', marginBottom: '28px', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+              <span style={{ color: 'var(--edu-text-muted)' }}>Trạng thái tài khoản:</span>
+              <span style={{ color: '#10b981', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }}></span>
+                Hoạt động tốt
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+              <span style={{ color: 'var(--edu-text-muted)' }}>Cấp độ truy cập:</span>
+              <span style={{ fontWeight: 700, color: 'var(--edu-text)' }}>{user?.role}</span>
+            </div>
+          </div>
+
+          <button
+            onClick={handleOpenModal}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', justify: 'center', gap: '8px', background: 'var(--edu-primary)', color: '#fff', border: 'none', padding: '13px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)' }}
+            onMouseOver={(e) => e.currentTarget.style.opacity = '0.92'}
+            onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+          >
+            <Key size={16} /> Đổi mật khẩu
+          </button>
         </div>
 
-        <div className="grid">
-          {/* Cột 1: Thông tin cá nhân */}
-          <div className="card profile-card">
-            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3>Thông tin tài khoản</h3>
-              <button className="btn btn-secondary btn-sm" onClick={handleOpenModal}>
-                Đổi mật khẩu
+        {/* Cột phải: Thông tin Chi tiết */}
+        <div className="stu-card">
+          <div className="stu-card-header">
+            <h3><User size={20} /> Thông tin Định danh</h3>
+          </div>
+          <div className="stu-card-body" style={{ padding: '28px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' }}>
+              <div style={{ background: '#f8fafc', padding: '18px', borderRadius: '14px', border: '1px solid var(--edu-border)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--edu-text-muted)', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>
+                  <Award size={16} style={{ color: 'var(--edu-primary)' }} /> Mã sinh viên / Cán bộ
+                </div>
+                <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--edu-text)', fontFamily: 'monospace' }}>
+                  {user?.studentCode || 'Không áp dụng (Cán bộ)'}
+                </div>
+              </div>
+
+              <div style={{ background: '#f8fafc', padding: '18px', borderRadius: '14px', border: '1px solid var(--edu-border)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--edu-text-muted)', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>
+                  <Mail size={16} style={{ color: '#8b5cf6' }} /> Email tài khoản
+                </div>
+                <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--edu-text)', wordBreak: 'break-all' }}>
+                  {user?.email}
+                </div>
+              </div>
+
+              <div style={{ background: '#f8fafc', padding: '18px', borderRadius: '14px', border: '1px solid var(--edu-border)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--edu-text-muted)', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>
+                  <BookOpen size={16} style={{ color: '#ec4899' }} /> Lớp sinh hoạt
+                </div>
+                <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--edu-text)' }}>
+                  {user?.classCode || 'Không có'}
+                </div>
+              </div>
+
+              <div style={{ background: '#f8fafc', padding: '18px', borderRadius: '14px', border: '1px solid var(--edu-border)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--edu-text-muted)', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>
+                  <GraduationCap size={16} style={{ color: '#10b981' }} /> Chuyên ngành đào tạo
+                </div>
+                <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--edu-text)' }}>
+                  {user?.major || 'Đại trà'}
+                </div>
+              </div>
+
+              <div style={{ background: '#f8fafc', padding: '18px', borderRadius: '14px', border: '1px solid var(--edu-border)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--edu-text-muted)', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>
+                  <Calendar size={16} style={{ color: '#f59e0b' }} /> Niên khóa
+                </div>
+                <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--edu-text)' }}>
+                  {user?.batch || 'N/A'}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Modal Đổi mật khẩu chuẩn theme sáng */}
+      {showModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+          <div className="stu-card" style={{ width: '90%', maxWidth: '460px', borderRadius: '20px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', animation: 'fadeIn 0.2s ease-out' }}>
+            <div className="stu-card-header" style={{ padding: '20px 24px' }}>
+              <h3 style={{ fontSize: '18px' }}><Lock size={18} /> Đổi mật khẩu tài khoản</h3>
+              <button onClick={handleCloseModal} style={{ background: 'none', border: 'none', color: 'var(--edu-text-muted)', cursor: 'pointer', padding: '4px' }}>
+                <X size={20} />
               </button>
             </div>
-            <div className="card-body">
-              <div className="profile-info-header">
-                <img
-                  src={user?.avatarUrl || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'}
-                  alt="Avatar"
-                  className="profile-avatar"
-                />
-                <div>
-                  <h4>{user?.fullName}</h4>
-                  <span className="badge-role">{user?.role}</span>
-                </div>
-              </div>
-
-              <div className="info-list">
-                <div className="info-item">
-                  <span className="info-label">Mã sinh viên:</span>
-                  <span className="info-value">{user?.studentCode || 'N/A (Cán bộ)'}</span>
-                </div>
-                <div className="info-item">
-                  <span className="info-label">Email đăng ký:</span>
-                  <span className="info-value">{user?.email}</span>
-                </div>
-                <div className="info-item">
-                  <span className="info-label">Lớp:</span>
-                  <span className="info-value">{user?.classCode || 'N/A'}</span>
-                </div>
-                <div className="info-item">
-                  <span className="info-label">Ngành học:</span>
-                  <span className="info-value">{user?.major || 'N/A'}</span>
-                </div>
-                <div className="info-item">
-                  <span className="info-label">Khóa:</span>
-                  <span className="info-value">{user?.batch || 'N/A'}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Cột 2: Bảng Điều khiển Kiểm thử */}
-          <div className="card console-card">
-            <div className="card-header">
-              <h3>Bảng điều khiển kiểm thử (Auth Console)</h3>
-            </div>
-            <div className="card-body">
-              <p className="card-desc">Sử dụng các công cụ dưới đây để kiểm nghiệm luồng hoạt động của Backend API:</p>
-              
-              <div className="button-group-row" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                <button className="btn btn-primary" onClick={handleTestApi} disabled={apiTestLoading}>
-                  {apiTestLoading ? 'Đang gọi...' : 'Gọi API Kiểm tra (/me)'}
-                </button>
-                <button className="btn btn-warning" onClick={handleCorruptTokenTest}>
-                  Mô phỏng Hết hạn Access Token (401)
-                </button>
-              </div>
-
-              {apiTestResponse && (
-                <div className="console-output" style={{ marginTop: '20px', background: 'rgba(15, 23, 42, 0.6)', padding: '15px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)' }}>
-                  <div className="console-title" style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '8px' }}>
-                    Kết quả phản hồi từ API:
-                  </div>
-                  <pre style={{ overflowX: 'auto', fontSize: '13px', color: '#c7d2fe', fontFamily: 'monospace' }}>{apiTestResponse}</pre>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </main>
-
-      {/* Modal Đổi mật khẩu */}
-      {showModal && (
-        <div className="modal-backdrop" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(15, 23, 42, 0.75)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
-          <div className="modal-content" style={{ background: 'var(--panel-bg)', border: '1px solid var(--panel-border)', borderRadius: '20px', padding: '30px', width: '90%', maxWidth: '500px', boxShadow: '0 20px 40px rgba(0,0,0,0.4)', animation: 'fadeInUp 0.3s ease-out' }}>
-            <div className="modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '12px' }}>
-              <h3 style={{ fontSize: '20px', fontWeight: '600' }}>Đổi mật khẩu tài khoản</h3>
-              <button className="modal-close" onClick={handleCloseModal} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', fontSize: '24px', cursor: 'pointer' }}>&times;</button>
-            </div>
+            
             <form onSubmit={handleChangePassword}>
-              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '20px' }}>
-                {modalError && <div className="alert alert-danger">{modalError}</div>}
-                {modalSuccess && <div className="alert alert-success">{modalSuccess}</div>}
+              <div className="stu-card-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '24px' }}>
+                {modalError && <div style={{ padding: '12px 16px', background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '10px', color: '#dc2626', fontSize: '14px', fontWeight: 500 }}>{modalError}</div>}
+                {modalSuccess && <div style={{ padding: '12px 16px', background: '#f0fdf4', border: '1px solid #86efac', borderRadius: '10px', color: '#16a34a', fontSize: '14px', fontWeight: 500 }}>{modalSuccess}</div>}
 
-                <div className="form-group">
-                  <label htmlFor="modalCurrentPwd">Mật khẩu hiện tại</label>
+                <div>
+                  <label htmlFor="modalCurrentPwd" style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--edu-text)', marginBottom: '6px' }}>Mật khẩu hiện tại</label>
                   <input
                     type="password"
                     id="modalCurrentPwd"
+                    placeholder="Nhập mật khẩu đang sử dụng"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     required
-                    style={{ background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '10px', color: 'var(--text-primary)', padding: '12px', fontSize: '15px' }}
+                    style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', border: '1px solid var(--edu-border)', borderRadius: '10px', fontSize: '14px', color: 'var(--edu-text)', outline: 'none' }}
                   />
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="modalNewPwd">Mật khẩu mới</label>
+                <div>
+                  <label htmlFor="modalNewPwd" style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--edu-text)', marginBottom: '6px' }}>Mật khẩu mới</label>
                   <input
                     type="password"
                     id="modalNewPwd"
@@ -223,29 +211,30 @@ const Profile = () => {
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     required
-                    style={{ background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '10px', color: 'var(--text-primary)', padding: '12px', fontSize: '15px' }}
+                    style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', border: '1px solid var(--edu-border)', borderRadius: '10px', fontSize: '14px', color: 'var(--edu-text)', outline: 'none' }}
                   />
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="modalConfirmPwd">Xác nhận mật khẩu mới</label>
+                <div>
+                  <label htmlFor="modalConfirmPwd" style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--edu-text)', marginBottom: '6px' }}>Xác nhận mật khẩu mới</label>
                   <input
                     type="password"
                     id="modalConfirmPwd"
-                    placeholder="Nhập lại mật khẩu mới"
+                    placeholder="Nhập lại chính xác mật khẩu mới"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
-                    style={{ background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '10px', color: 'var(--text-primary)', padding: '12px', fontSize: '15px' }}
+                    style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', border: '1px solid var(--edu-border)', borderRadius: '10px', fontSize: '14px', color: 'var(--edu-text)', outline: 'none' }}
                   />
                 </div>
               </div>
-              <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                <button type="button" className="btn btn-secondary" onClick={handleCloseModal} disabled={modalLoading}>
+
+              <div style={{ padding: '16px 24px', background: '#f8fafc', borderTop: '1px solid var(--edu-border)', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                <button type="button" onClick={handleCloseModal} disabled={modalLoading} style={{ padding: '10px 18px', background: '#fff', border: '1px solid var(--edu-border)', borderRadius: '10px', fontSize: '14px', fontWeight: 600, color: 'var(--edu-text)', cursor: 'pointer' }}>
                   Hủy
                 </button>
-                <button type="submit" className="btn btn-primary" disabled={modalLoading}>
-                  {modalLoading ? 'Đang cập nhật...' : 'Xác nhận đổi'}
+                <button type="submit" disabled={modalLoading} style={{ padding: '10px 20px', background: 'var(--edu-primary)', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: 700, color: '#fff', cursor: 'pointer' }}>
+                  {modalLoading ? 'Đang lưu...' : 'Xác nhận đổi'}
                 </button>
               </div>
             </form>
