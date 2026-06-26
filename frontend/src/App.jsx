@@ -18,6 +18,7 @@ import AdminUsers from './pages/admin/AdminUsers';
 import StudentDashboard from './pages/student/StudentDashboard';
 import ExploreEvents from './pages/student/ExploreEvents';
 import StudentEventDetail from './pages/student/StudentEventDetail';
+import StudentCalendar from './pages/student/StudentCalendar';
 
 function App() {
   return (
@@ -51,6 +52,16 @@ function App() {
               <ProtectedRoute>
                 <StudentLayout>
                   <StudentDashboard />
+                </StudentLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/calendar"
+            element={
+              <ProtectedRoute>
+                <StudentLayout>
+                  <StudentCalendar />
                 </StudentLayout>
               </ProtectedRoute>
             }

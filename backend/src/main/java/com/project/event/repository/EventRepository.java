@@ -24,4 +24,11 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
     // Tìm kiếm sự kiện công khai theo từ khóa
     @Query("SELECT e FROM Event e WHERE e.status = :status AND (LOWER(e.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(e.location) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(e.description) LIKE LOWER(CONCAT('%', :keyword, '%'))) ORDER BY e.startTime DESC")
     List<Event> searchEventsByStatus(String status, String keyword);
+
+    // Lấy các sự kiện công khai (không phải DRAFT)
+    List<Event> findByStatusNotOrderByStartTimeDesc(String status);
+
+    // Tìm kiếm sự kiện công khai (không phải DRAFT)
+    @Query("SELECT e FROM Event e WHERE e.status != :status AND (LOWER(e.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(e.location) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(e.description) LIKE LOWER(CONCAT('%', :keyword, '%'))) ORDER BY e.startTime DESC")
+    List<Event> searchEventsByStatusNot(String status, String keyword);
 }

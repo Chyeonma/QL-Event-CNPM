@@ -35,6 +35,8 @@ public class Registration {
 
     @PrePersist
     protected void onCreate() {
-        registeredAt = LocalDateTime.now();
+        if (registeredAt == null) {
+            registeredAt = LocalDateTime.now();
+        }
     }
 }

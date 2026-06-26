@@ -23,4 +23,7 @@ public class StudentRegistrationResponse {
     private String status; // REGISTERED, CANCELLED
     private LocalDateTime registeredAt;
     private LocalDateTime checkedInAt;
+    private String description;
+    private String organizerName;
+    private String eventStatus; // PUBLISHED, CLOSED
 }

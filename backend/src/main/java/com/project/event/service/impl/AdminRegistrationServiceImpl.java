@@ -21,25 +21,36 @@ public class AdminRegistrationServiceImpl implements AdminRegistrationService {
 
     private final RegistrationRepository registrationRepository;
 
+    private AdminRegistrationResponse mapToDto(Registration reg) {
+        User student = reg.getStudent();
+        return AdminRegistrationResponse.builder()
+                .id(reg.getId())
+                .studentId(student != null ? student.getId() : null)
+                .studentCode(student != null ? student.getStudentCode() : "N/A")
+                .fullName(student != null ? student.getFullName() : "Khách")
+                .classCode(student != null ? student.getClassCode() : "N/A")
+                .email(student != null ? student.getEmail() : "N/A")
+                .status(reg.getStatus())
+                .registeredAt(reg.getRegisteredAt())
+                .checkedInAt(reg.getCheckedInAt())
+                .build();
+    }
+
     @Override
     @Transactional(readOnly = true)
     public List<AdminRegistrationResponse> getEventRegistrations(UUID eventId) {
         return registrationRepository.findByEventIdOrderByRegisteredAtDesc(eventId)
                 .stream()
-                .map(reg -> {
-                    User student = reg.getStudent();
-                    return AdminRegistrationResponse.builder()
-                            .id(reg.getId())
-                            .studentId(student != null ? student.getId() : null)
-                            .studentCode(student != null ? student.getStudentCode() : "N/A")
-                            .fullName(student != null ? student.getFullName() : "Khách")
-                            .classCode(student != null ? student.getClassCode() : "N/A")
-                            .email(student != null ? student.getEmail() : "N/A")
-                            .status(reg.getStatus())
-                            .registeredAt(reg.getRegisteredAt())
-                            .checkedInAt(reg.getCheckedInAt())
-                            .build();
-                })
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AdminRegistrationResponse> getAllRegistrations() {
+        return registrationRepository.findAll()
+                .stream()
+                .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
 

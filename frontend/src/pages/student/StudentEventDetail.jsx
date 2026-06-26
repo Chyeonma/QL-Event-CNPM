@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Calendar, MapPin, Users, Award, Clock, ArrowLeft, 
-  CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Share2, Sparkles, Target, Loader2 
+  CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Share2, Sparkles, Target, Loader2, Lock 
 } from 'lucide-react';
 import { publicEventService } from '../../services/publicEventService';
 
@@ -102,6 +102,7 @@ const StudentEventDetail = () => {
 
   const progressPercent = Math.min(100, Math.round(((event.registeredCount || 0) / (event.capacity || 1)) * 100));
   const isFull = (event.registeredCount || 0) >= (event.capacity || 100);
+  const isClosed = event.status === 'CLOSED';
 
   return (
     <div style={{ background: '#f8fafc', minHeight: '100vh', paddingBottom: '80px' }}>
@@ -181,9 +182,15 @@ const StudentEventDetail = () => {
             <span style={{ background: 'var(--edu-primary)', color: 'white', padding: '6px 14px', borderRadius: '50px', fontSize: '13px', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '6px', boxShadow: '0 4px 12px rgba(37,99,235,0.4)' }}>
               <Sparkles size={14} /> +{event.trainingPoints || 5} Điểm rèn luyện
             </span>
-            <span style={{ background: 'rgba(16, 185, 129, 0.9)', color: 'white', padding: '6px 14px', borderRadius: '50px', fontSize: '13px', fontWeight: '700', backdropFilter: 'blur(4px)' }}>
-              Đang mở đăng ký
-            </span>
+            {isClosed ? (
+              <span style={{ background: 'rgba(71, 85, 105, 0.9)', color: 'white', padding: '6px 14px', borderRadius: '50px', fontSize: '13px', fontWeight: '700', backdropFilter: 'blur(4px)', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <Lock size={13}/> Đã kết thúc
+              </span>
+            ) : (
+              <span style={{ background: 'rgba(16, 185, 129, 0.9)', color: 'white', padding: '6px 14px', borderRadius: '50px', fontSize: '13px', fontWeight: '700', backdropFilter: 'blur(4px)' }}>
+                Đang mở đăng ký
+              </span>
+            )}
             {event.location && (
               <span style={{ background: 'rgba(255, 255, 255, 0.25)', color: 'white', padding: '6px 14px', borderRadius: '50px', fontSize: '13px', fontWeight: '600', backdropFilter: 'blur(8px)' }}>
                 {event.location}
@@ -296,7 +303,16 @@ const StudentEventDetail = () => {
             </div>
 
             {/* KHUNG NÚT ĐĂNG KÝ */}
-            {event.isRegistered ? (
+            {isClosed ? (
+              <div style={{ background: '#f1f5f9', border: '1px dashed #cbd5e1', color: '#475569', padding: '20px 16px', borderRadius: '16px', textAlign: 'center' }}>
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 800, fontSize: '15.5px', color: '#334155', marginBottom: '6px' }}>
+                  <Lock size={18} color="#64748b" /> Sự kiện đã khép lại
+                </span>
+                <p style={{ fontSize: '13px', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
+                  Thời hạn tiếp nhận đăng ký và điểm danh đã chính thức kết thúc. Hẹn gặp lại bạn ở các chương trình sau nhé!
+                </p>
+              </div>
+            ) : event.isRegistered ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', color: '#065f46', padding: '14px', borderRadius: '12px', textAlign: 'center', fontWeight: '700', fontSize: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                   <CheckCircle2 size={20} color="#10b981" /> Bạn đã đăng ký sự kiện này
@@ -337,7 +353,7 @@ const StudentEventDetail = () => {
             )}
 
             <p style={{ fontSize: '12px', color: '#94a3b8', textAlign: 'center', marginTop: '16px', lineHeight: '1.5' }}>
-              Mã QR điểm danh sẽ xuất hiện tại Trang cá nhân (Dashboard) sau khi đăng ký thành công.
+              {isClosed ? 'Danh sách điểm danh đã được hệ thống chốt.' : 'Mã QR điểm danh sẽ xuất hiện tại Trang cá nhân (Dashboard) sau khi đăng ký thành công.'}
             </p>
           </div>
 

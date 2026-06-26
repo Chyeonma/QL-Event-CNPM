@@ -2226,3 +2226,64 @@ body {
 [data-theme="dark"] [style*="color: rgb(107, 114, 128)"] {
   color: #94a3b8 !important;
 }
+
+/* Dashboard Detail Boxes (Light & Dark mode support) */
+.dashboard-detail-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8fafc;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #f1f5f9;
+}
+.dashboard-detail-box strong {
+  font-size: 13px;
+  color: #1e293b;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dashboard-detail-box span {
+  font-size: 11px;
+  color: #64748b;
+  text-transform: uppercase;
+  font-weight: 600;
+  display: block;
+}
+
+.dashboard-detail-box.highlight {
+  background: #fef3c7;
+  border-color: #fde68a;
+}
+.dashboard-detail-box.highlight strong {
+  font-size: 14px;
+  color: #b45309;
+}
+.dashboard-detail-box.highlight span {
+  color: #92400e;
+}
+
+/* Dark Mode Overrides for Dashboard Detail Boxes */
+[data-theme="dark"] .dashboard-detail-box {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+}
+[data-theme="dark"] .dashboard-detail-box strong {
+  color: #f8fafc !important;
+}
+[data-theme="dark"] .dashboard-detail-box span {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .dashboard-detail-box.highlight {
+  background: rgba(245, 158, 11, 0.15) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+[data-theme="dark"] .dashboard-detail-box.highlight strong {
+  color: #fbbf24 !important;
+}
+[data-theme="dark"] .dashboard-detail-box.highlight span {
+  color: #fcd34d !important;
+}

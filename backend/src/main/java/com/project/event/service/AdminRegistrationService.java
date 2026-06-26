@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public interface AdminRegistrationService {
     List<AdminRegistrationResponse> getEventRegistrations(UUID eventId);
+    List<AdminRegistrationResponse> getAllRegistrations();
     MessageResponse manualCheckIn(UUID registrationId);
     MessageResponse cancelStudentRegistration(UUID registrationId);
 }

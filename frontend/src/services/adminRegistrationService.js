@@ -6,6 +6,11 @@ export const adminRegistrationService = {
     return response.data;
   },
 
+  getAllRegistrations: async () => {
+    const response = await axiosInstance.get('/api/admin/events/registrations/all');
+    return response.data;
+  },
+
   manualCheckIn: async (registrationId) => {
     const response = await axiosInstance.post(`/api/admin/events/registrations/${registrationId}/check-in`);
     return response.data;

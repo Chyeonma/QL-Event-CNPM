@@ -25,6 +25,12 @@ public class AdminRegistrationController {
         return ResponseEntity.ok(adminRegistrationService.getEventRegistrations(eventId));
     }
 
+    // 1.1 Lấy tất cả danh sách đăng ký trong toàn hệ thống
+    @GetMapping("/registrations/all")
+    public ResponseEntity<List<AdminRegistrationResponse>> getAllRegistrations() {
+        return ResponseEntity.ok(adminRegistrationService.getAllRegistrations());
+    }
+
     // 2. Điểm danh thủ công cho sinh viên
     @PostMapping("/registrations/{registrationId}/check-in")
     public ResponseEntity<MessageResponse> manualCheckIn(@PathVariable UUID registrationId) {

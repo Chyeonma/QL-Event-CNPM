@@ -27,9 +27,9 @@ public class PublicEventServiceImpl implements PublicEventService {
     public List<PublicEventResponse> getPublishedEvents(String keyword, UUID currentUserId) {
         List<Event> events;
         if (keyword != null && !keyword.trim().isEmpty()) {
-            events = eventRepository.searchEventsByStatus("PUBLISHED", keyword.trim());
+            events = eventRepository.searchEventsByStatusNot("DRAFT", keyword.trim());
         } else {
-            events = eventRepository.findByStatusOrderByStartTimeDesc("PUBLISHED");
+            events = eventRepository.findByStatusNotOrderByStartTimeDesc("DRAFT");
         }
 
         return events.stream()
@@ -42,7 +42,7 @@ public class PublicEventServiceImpl implements PublicEventService {
     public PublicEventResponse getEventDetail(UUID eventId, UUID currentUserId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Sự kiện không tồn tại"));
-        if (!"PUBLISHED".equals(event.getStatus())) {
+        if ("DRAFT".equals(event.getStatus())) {
             throw new RuntimeException("Sự kiện chưa được công bố");
         }
         return mapToPublicResponse(event, currentUserId);
@@ -53,6 +53,9 @@ public class PublicEventServiceImpl implements PublicEventService {
     public MessageResponse registerEvent(UUID eventId, UUID studentId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Sự kiện không tồn tại"));
+        if ("CLOSED".equals(event.getStatus())) {
+            throw new RuntimeException("Sự kiện này đã kết thúc, không thể tiếp nhận vé đăng ký mới!");
+        }
         if (!"PUBLISHED".equals(event.getStatus())) {
             throw new RuntimeException("Sự kiện chưa mở đăng ký");
         }
@@ -97,6 +100,10 @@ public class PublicEventServiceImpl implements PublicEventService {
         Registration reg = registrationRepository.findByEventIdAndStudentId(eventId, studentId)
                 .orElseThrow(() -> new RuntimeException("Bạn chưa đăng ký sự kiện này"));
 
+        if ("CLOSED".equals(reg.getEvent().getStatus())) {
+            throw new RuntimeException("Sự kiện đã khép lại, không thể hủy vé!");
+        }
+
         if ("CANCELLED".equals(reg.getStatus())) {
             throw new RuntimeException("Bạn đã hủy đăng ký sự kiện này trước đó");
         }
@@ -123,6 +130,9 @@ public class PublicEventServiceImpl implements PublicEventService {
                         .status(r.getStatus())
                         .registeredAt(r.getRegisteredAt())
                         .checkedInAt(r.getCheckedInAt())
+                        .description(r.getEvent().getDescription())
+                        .organizerName(r.getEvent().getCreatedBy() != null ? r.getEvent().getCreatedBy().getFullName() : "Đoàn Thanh Niên PTIT")
+                        .eventStatus(r.getEvent().getStatus())
                         .build())
                 .collect(Collectors.toList());
     }

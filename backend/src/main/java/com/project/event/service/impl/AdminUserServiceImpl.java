@@ -34,7 +34,12 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public List<AdminUserResponse> getUsersByRole(String role) {
-        List<User> users = userRepository.findByRole(role.toUpperCase());
+        List<User> users;
+        if (role == null || role.trim().isEmpty() || "ALL".equalsIgnoreCase(role.trim())) {
+            users = userRepository.findAll();
+        } else {
+            users = userRepository.findByRole(role.trim().toUpperCase());
+        }
         return users.stream().map(this::mapToResponse).collect(Collectors.toList());
     }
 

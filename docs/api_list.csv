@@ -1,0 +1,46 @@
+Luồng Xác thực & Tài khoản (AuthController),,,,,giải quyết vấn đề đăng nhập và xác thực danh tính,
+STT,HTTP Method,Tên,Endpoint,Quyền (Role),Chức năng chính,Backend
+1.1,POST,Đăng nhập,/api/auth/login,Public,Nhận email (hoặc username/mã SV) + password. Trả về JWT Token.,TRUE
+1.2,POST,Đăng nhập bằng Google,/api/auth/google-login,Public,"Đăng nhập bằng tài khoản Google, xác thực qua Google Token/ID",TRUE
+1.3,POST,Đổi mật khẩu,/api/auth/change-password,Authenticated,Đổi mật khẩu người dùng (Bắt buộc gọi nếu require_password_change = true).,TRUE
+1.4,GET,Lấy thông tin tài khoản,/api/auth/me,Authenticated,"Lấy thông tin chi tiết của token hiện tại (Tên, role, mã SV, avatar...).",TRUE
+1.5,POST,Quên mật khẩu,/api/auth/forgot-password,Public,Tự động tạo mật khẩu mới và gửi qua Email đã đăng ký,TRUE
+1.6,POST,Làm mới Token,/api/auth/refresh,Public,Cấp lại Access Token mới dựa vào Refresh Token hợp lệ,TRUE
+1.7,POST,Đăng xuất,/api/auth/logout,Authenticated,Đăng xuất khỏi hệ thống và vô hiệu hóa phiên làm việc,TRUE
+,,,,,,
+Luồng Người dùng (UserController / Profile),,,,,giải quyết vấn đề thông tin cá nhân của sinh viên,
+STT,HTTP Method,Tên,Endpoint,Quyền (Role),Chức năng chính,Backend
+2.1,GET,Thông tin cá nhân,/api/auth/me,Authenticated,"Lấy thông tin người dùng đang đăng nhập (Vai trò, điểm rèn luyện...).",TRUE
+,,,,,,
+Luồng Sự kiện cho Sinh viên & Công khai (EventController),,,,,khám phá và tham gia sự kiện,
+STT,HTTP Method,Tên,Endpoint,Quyền (Role),Chức năng chính,Backend
+3.1,GET,Danh sách sự kiện,/api/events,Public,Xem danh sách sự kiện công khai (hỗ trợ lọc từ khóa và trạng thái PUBLISHED/CLOSED),TRUE
+3.2,GET,Chi tiết sự kiện,/api/events/{id},Public,Xem chi tiết thông tin một sự kiện và điều kiện tham gia,TRUE
+3.3,POST,Đăng ký sự kiện,/api/events/{id}/register,Student,Sinh viên đăng ký nhận vé tham gia sự kiện,TRUE
+3.4,DELETE,Hủy đăng ký sự kiện,/api/events/{id}/register,Student,Sinh viên tự hủy suất vé đăng ký tham gia sự kiện,TRUE
+3.5,GET,Vé đã đăng ký,/api/events/my-registrations,Student,Lấy danh sách toàn bộ các sự kiện mà sinh viên hiện tại đã đăng ký,TRUE
+3.6,POST,Quét QR Điểm danh,/api/events/{id}/check-in,Student,Sinh viên quét mã QR tại quầy để xác nhận điểm danh,TRUE
+,,,,,,
+Luồng Quản lý Sự kiện (AdminEventController),,,,,dành cho Admin & Ban tổ chức thao tác với sự kiện,
+STT,HTTP Method,Tên,Endpoint,Quyền (Role),Chức năng chính,Backend
+4.1,GET,Toàn bộ sự kiện,/api/admin/events,Admin & Manager,Xem danh sách tất cả sự kiện trong hệ thống (mọi trạng thái DRAFT/PUBLISHED/CLOSED),TRUE
+4.2,POST,Tạo sự kiện mới,/api/admin/events,Admin & Manager,Tạo mới một sự kiện kèm ảnh phông nền và quy định đối tượng tham gia,TRUE
+4.3,GET,Chi tiết sự kiện quản trị,/api/admin/events/{id},Admin & Manager,Xem chi tiết dữ liệu quản trị của một sự kiện theo ID,TRUE
+4.4,PUT,Cập nhật sự kiện,/api/admin/events/{id},Admin & Manager,Chỉnh sửa nội dung sự kiện và cập nhật trạng thái đóng/mở đăng ký,TRUE
+4.5,DELETE,Xóa sự kiện,/api/admin/events/{id},Admin & Manager,Xóa hoàn toàn sự kiện khỏi cơ sở dữ liệu hệ thống,TRUE
+,,,,,,
+Luồng Quản lý Người dùng (AdminUserController),,,,,dành cho Admin quản trị tài khoản hệ thống,
+STT,HTTP Method,Tên,Endpoint,Quyền (Role),Chức năng chính,Backend
+5.1,GET,Danh sách người dùng,/api/admin/users,Admin,Xem danh sách toàn bộ người dùng phân theo vai trò (Student/Manager/Admin),TRUE
+5.2,POST,Tạo tài khoản mới,/api/admin/users,Admin,Tạo mới tài khoản người dùng hoặc cán bộ quản lý,TRUE
+5.3,GET,Chi tiết người dùng,/api/admin/users/{id},Admin,Lấy thông tin chi tiết một người dùng theo ID,TRUE
+5.4,PUT,Cập nhật người dùng,/api/admin/users/{id},Admin,Cập nhật thông tin cá nhân và quyền hạn của người dùng,TRUE
+5.5,DELETE,Khóa tài khoản,/api/admin/users/{id},Admin,Khóa (Vô hiệu hóa) tài khoản người dùng vi phạm,TRUE
+5.6,POST,Mở khóa tài khoản,/api/admin/users/{id}/unlock,Admin,Khôi phục trạng thái hoạt động cho tài khoản bị khóa,TRUE
+,,,,,,
+Luồng Điểm danh & Danh sách Đăng ký (AdminRegistrationController),,,,,quản lý danh sách tham dự và cộng điểm rèn luyện,
+STT,HTTP Method,Tên,Endpoint,Quyền (Role),Chức năng chính,Backend
+6.1,GET,Danh sách đăng ký theo sự kiện,/api/admin/events/{eventId}/registrations,Admin & Manager,Xem danh sách sinh viên đã đăng ký tham gia một sự kiện cụ thể,TRUE
+6.2,GET,Toàn bộ danh sách đăng ký hệ thống,/api/admin/events/registrations/all,Admin & Manager,Lấy danh sách tất cả lượt đăng ký sự kiện trên toàn hệ thống,TRUE
+6.3,POST,Điểm danh thủ công,/api/admin/events/registrations/{regId}/check-in,Admin & Manager,Cán bộ quản lý xác nhận điểm danh thủ công cho sinh viên,TRUE
+6.4,DELETE,Hủy suất đăng ký,/api/admin/events/registrations/{regId},Admin & Manager,Ban tổ chức hủy suất đăng ký tham gia của sinh viên,TRUE

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Users, Search, Filter, ArrowRight, CheckCircle2, Loader2 } from 'lucide-react';
+import { Calendar, MapPin, Users, Search, Filter, ArrowRight, CheckCircle2, Loader2, Lock } from 'lucide-react';
 import { publicEventService } from '../../services/publicEventService';
 
 const ExploreEvents = () => {
@@ -133,17 +133,24 @@ const ExploreEvents = () => {
             const bgUrl = ev.images && ev.images.length > 0
               ? ev.images[0].imageUrl
               : `https://images.unsplash.com/photo-${1515187029135 + idx}-18ee286d815b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80`;
+            const isClosed = ev.status === 'CLOSED';
 
             return (
-              <div className="event-grid-card" key={ev.id} style={{ transition: 'transform 0.2s', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+              <div className="event-grid-card" key={ev.id} style={{ transition: 'transform 0.2s', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', opacity: isClosed ? 0.78 : 1 }}>
                 <div 
                   className="event-card-img" 
                   onClick={() => navigate(`/explore/${ev.id}`)}
-                  style={{ backgroundImage: `url('${bgUrl}')`, backgroundSize: 'cover', backgroundPosition: 'center', cursor: 'pointer' }}
+                  style={{ backgroundImage: `url('${bgUrl}')`, backgroundSize: 'cover', backgroundPosition: 'center', cursor: 'pointer', filter: isClosed ? 'grayscale(35%)' : 'none' }}
                 >
                   <div className="event-badges">
                     <span className="badge-cat">{ev.location || 'PTIT Campus'}</span>
-                    <span className="badge-status green">Đang mở</span>
+                    {isClosed ? (
+                      <span style={{ fontSize: '11px', fontWeight: 700, background: '#475569', color: '#f8fafc', padding: '3px 10px', borderRadius: '14px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Lock size={12}/> Đã kết thúc
+                      </span>
+                    ) : (
+                      <span className="badge-status green">Đang mở</span>
+                    )}
                   </div>
                 </div>
                 <div className="event-card-body">
@@ -165,7 +172,7 @@ const ExploreEvents = () => {
                   </p>
                   <div className="event-card-footer" style={{ borderTop: '1px solid var(--edu-border)', paddingTop: '16px', marginTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                      <span className="event-dr-points">+{ev.trainingPoints || 5} ĐRL</span>
+                      <span className="event-dr-points" style={{ opacity: isClosed ? 0.7 : 1 }}>+{ev.trainingPoints || 5} ĐRL</span>
                       <button 
                         onClick={() => navigate(`/explore/${ev.id}`)}
                         style={{ background: 'transparent', border: 'none', color: '#3b82f6', fontSize: '12px', fontWeight: '600', padding: 0, cursor: 'pointer', textAlign: 'left', display: 'inline-flex', alignItems: 'center', gap: '2px' }}
@@ -175,7 +182,14 @@ const ExploreEvents = () => {
                     </div>
                     
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                      {ev.isRegistered ? (
+                      {isClosed ? (
+                        <button 
+                          style={{ background: '#e2e8f0', color: '#64748b', border: '1px solid #cbd5e1', padding: '6px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, cursor: 'not-allowed', display: 'flex', alignItems: 'center', gap: '4px' }}
+                          disabled={true}
+                        >
+                          <Lock size={13}/> Đã khép lại
+                        </button>
+                      ) : ev.isRegistered ? (
                         <>
                           <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#10b981', fontSize: '13px', fontWeight: 700 }}>
                             <CheckCircle2 size={16} /> Đã đăng ký
