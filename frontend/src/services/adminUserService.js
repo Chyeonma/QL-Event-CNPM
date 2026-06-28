@@ -5,7 +5,7 @@ export const adminUserService = {
     const response = await axiosInstance.get(`/api/admin/users?role=${role}`);
     return response.data;
   },
-  
+
   getUserById: async (id) => {
     const response = await axiosInstance.get(`/api/admin/users/${id}`);
     return response.data;
@@ -29,5 +29,20 @@ export const adminUserService = {
   unlockUser: async (id) => {
     const response = await axiosInstance.post(`/api/admin/users/${id}/unlock`);
     return response.data;
-  }
+  },
+
+  deleteUserPermanently: async (id) => {
+    const response = await axiosInstance.delete(`/api/admin/users/${id}/permanent`);
+    return response.data;
+  },
+
+  activateUser: async (id) => {
+    const response = await axiosInstance.post(`/api/admin/users/${id}/activate`);
+    return response.data;
+  },
+
+  promoteByEmail: async (email, role) => {
+    const response = await axiosInstance.post('/api/admin/users/promote-by-email', { email, role });
+    return response.data;
+  },
 };

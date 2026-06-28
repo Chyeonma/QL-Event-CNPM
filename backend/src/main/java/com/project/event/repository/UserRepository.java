@@ -20,7 +20,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     @Query("SELECT u FROM User u WHERE (LOWER(TRIM(u.studentCode)) = LOWER(TRIM(:identifier)) OR LOWER(TRIM(u.email)) = LOWER(TRIM(:identifier))) AND u.isDeleted = false")
     Optional<User> findByIdentifier(@Param("identifier") String identifier);
-    
+
     List<User> findByRole(String role);
 }
-

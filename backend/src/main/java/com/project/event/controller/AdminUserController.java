@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -48,11 +49,33 @@ public class AdminUserController {
         adminUserService.lockUser(id);
         return ResponseEntity.ok().build();
     }
-    
+
     @PostMapping("/{id}/unlock")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> unlockUser(@PathVariable UUID id) {
         adminUserService.unlockUser(id);
         return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{id}/permanent")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteUserPermanently(@PathVariable UUID id) {
+        adminUserService.deleteUserPermanently(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{id}/activate")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> activateUser(@PathVariable UUID id) {
+        adminUserService.activateUser(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/promote-by-email")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<AdminUserResponse> promoteByEmail(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        String role = body.get("role");
+        return ResponseEntity.ok(adminUserService.promoteUserByEmail(email, role));
     }
 }

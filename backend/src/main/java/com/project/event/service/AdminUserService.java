@@ -13,4 +13,7 @@ public interface AdminUserService {
     AdminUserResponse updateUser(UUID id, AdminUserRequest request);
     void lockUser(UUID id);
     void unlockUser(UUID id);
+    void deleteUserPermanently(UUID id);
+    void activateUser(UUID id);
+    AdminUserResponse promoteUserByEmail(String email, String role);
 }

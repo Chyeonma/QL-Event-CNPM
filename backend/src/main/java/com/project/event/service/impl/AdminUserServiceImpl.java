@@ -71,13 +71,13 @@ public class AdminUserServiceImpl implements AdminUserService {
     public AdminUserResponse updateUser(UUID id, AdminUserRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
-        
+
         user.setStudentCode(request.getStudentCode());
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
         user.setClassCode(request.getClassCode());
         user.setRole(request.getRole() != null ? request.getRole().toUpperCase() : user.getRole());
-        
+
         return mapToResponse(userRepository.save(user));
     }
 
@@ -95,5 +95,29 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
         user.setIsDeleted(false);
         userRepository.save(user);
+    }
+
+    @Override
+    public void deleteUserPermanently(UUID id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+        userRepository.delete(user);
+    }
+
+    @Override
+    public void activateUser(UUID id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+        user.setRequirePasswordChange(false);
+        user.setIsDeleted(false);
+        userRepository.save(user);
+    }
+
+    @Override
+    public AdminUserResponse promoteUserByEmail(String email, String role) {
+        User user = userRepository.findByEmailIgnoreCaseAndIsDeletedFalse(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với email: " + email));
+        user.setRole(role.trim().toUpperCase());
+        return mapToResponse(userRepository.save(user));
     }
 }
