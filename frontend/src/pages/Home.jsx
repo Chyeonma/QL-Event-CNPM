@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Bell, GraduationCap, Users, Shield, Calendar, MapPin, ArrowRight } from 'lucide-react';
 import StudentLayout from '../layouts/StudentLayout';
+import NotificationBell from '../components/NotificationBell';
 import '../educampus.css';
 
 const Home = () => {
@@ -32,7 +33,7 @@ const Home = () => {
             <span onClick={() => navigate('/explore')}>Sự kiện</span>
           </div>
           <div className="edu-nav-actions">
-            <button className="edu-btn-icon"><Bell size={18} /></button>
+            {user ? <NotificationBell /> : <button className="edu-btn-icon" onClick={() => navigate('/login')}><Bell size={18} /></button>}
             <button className="edu-btn-primary" onClick={() => navigate('/login')}>Đăng nhập</button>
           </div>
         </nav>

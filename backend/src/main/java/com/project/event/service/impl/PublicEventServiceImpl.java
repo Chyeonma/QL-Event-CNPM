@@ -22,6 +22,7 @@ public class PublicEventServiceImpl implements PublicEventService {
     private final RegistrationRepository registrationRepository;
     private final UserRepository userRepository;
     private final EventManagerRepository eventManagerRepository;
+    private final com.project.event.service.NotificationService notificationService;
 
     @Override
     @Transactional(readOnly = true)
@@ -81,6 +82,14 @@ public class PublicEventServiceImpl implements PublicEventService {
                 existing.setStatus("REGISTERED");
                 existing.setCheckedInAt(null);
                 registrationRepository.save(existing);
+
+                notificationService.sendNotification(
+                        studentId,
+                        eventId,
+                        "🎉 Khôi phục đăng ký thành công",
+                        "Bạn đã đăng ký lại thành công sự kiện: " + event.getTitle() + " diễn ra lúc " + event.getStartTime() + "."
+                );
+
                 return new MessageResponse("Đăng ký tham gia sự kiện thành công");
             }
         }
@@ -91,6 +100,13 @@ public class PublicEventServiceImpl implements PublicEventService {
                 .status("REGISTERED")
                 .build();
         registrationRepository.save(reg);
+
+        notificationService.sendNotification(
+                studentId,
+                eventId,
+                "🎉 Đăng ký thành công",
+                "Bạn đã đăng ký thành công vé tham dự sự kiện: " + event.getTitle() + ". Vui lòng mang mã QR đến đúng giờ để check-in."
+        );
 
         return new MessageResponse("Đăng ký tham gia sự kiện thành công");
     }
@@ -105,12 +121,24 @@ public class PublicEventServiceImpl implements PublicEventService {
             throw new RuntimeException("Sự kiện đã khép lại, không thể hủy vé!");
         }
 
+        if (reg.getCheckedInAt() != null || "CHECKED_IN".equals(reg.getStatus())) {
+            throw new RuntimeException("Bạn đã được điểm danh thành công, không thể hủy đăng ký!");
+        }
+
         if ("CANCELLED".equals(reg.getStatus())) {
             throw new RuntimeException("Bạn đã hủy đăng ký sự kiện này trước đó");
         }
 
         reg.setStatus("CANCELLED");
         registrationRepository.save(reg);
+
+        notificationService.sendNotification(
+                studentId,
+                eventId,
+                "ℹ️ Hủy đăng ký sự kiện",
+                "Bạn đã hủy vé tham dự sự kiện: " + reg.getEvent().getTitle() + "."
+        );
+
         return new MessageResponse("Hủy đăng ký sự kiện thành công");
     }
 
@@ -154,6 +182,14 @@ public class PublicEventServiceImpl implements PublicEventService {
 
         reg.setCheckedInAt(LocalDateTime.now());
         registrationRepository.save(reg);
+
+        notificationService.sendNotification(
+                studentId,
+                eventId,
+                "✅ Điểm danh QR thành công",
+                "Bạn đã điểm danh thành công tại sự kiện: " + reg.getEvent().getTitle() + " (+" + reg.getEvent().getTrainingPoints() + " điểm rèn luyện)."
+        );
+
         return new MessageResponse("Điểm danh sự kiện thành công");
     }
 
@@ -169,9 +205,9 @@ public class PublicEventServiceImpl implements PublicEventService {
             if (regOpt.isPresent()) {
                 Registration r = regOpt.get();
                 userStatus = r.getStatus();
-                if ("REGISTERED".equals(userStatus)) {
+                if ("REGISTERED".equals(userStatus) || "CHECKED_IN".equals(userStatus) || r.getCheckedInAt() != null) {
                     isReg = true;
-                    if (r.getCheckedInAt() != null) {
+                    if (r.getCheckedInAt() != null || "CHECKED_IN".equals(userStatus)) {
                         userStatus = "CHECKED_IN";
                     }
                 }

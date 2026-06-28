@@ -4,6 +4,7 @@ import com.project.event.dto.AddEventManagerRequest;
 import com.project.event.dto.AdminRegistrationResponse;
 import com.project.event.dto.EventManagerResponse;
 import com.project.event.dto.MessageResponse;
+import com.project.event.dto.SendNotificationRequest;
 import com.project.event.entity.Event;
 import com.project.event.entity.EventManager;
 import com.project.event.entity.Registration;
@@ -32,6 +33,7 @@ public class EventManagerServiceImpl implements EventManagerService {
     private final UserRepository userRepository;
     private final RegistrationRepository registrationRepository;
     private final AdminRegistrationService adminRegistrationService;
+    private final com.project.event.service.NotificationService notificationService;
 
     private boolean checkCanManage(Event event, User currentUser) {
         if (currentUser == null) return false;
@@ -157,5 +159,21 @@ public class EventManagerServiceImpl implements EventManagerService {
         }
 
         return adminRegistrationService.cancelCheckIn(registrationId);
+    }
+
+    @Override
+    @Transactional
+    public MessageResponse sendNotificationForManager(UUID eventId, SendNotificationRequest request, UUID currentUserId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("Sự kiện không tồn tại"));
+        User currentUser = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new RuntimeException("Người dùng không hợp lệ"));
+
+        if (!checkCanManage(event, currentUser)) {
+            throw new RuntimeException("Bạn không có quyền gửi thông báo cho sự kiện này");
+        }
+
+        int count = notificationService.broadcastToEventRegistrants(eventId, request.getTitle(), request.getMessage());
+        return new MessageResponse("Đã gửi thông báo thành công tới " + count + " sinh viên đăng ký!");
     }
 }

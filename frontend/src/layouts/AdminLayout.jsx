@@ -19,6 +19,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import NotificationBell from '../components/NotificationBell';
 
 const menuSections = [
   {
@@ -199,10 +200,7 @@ const AdminLayout = ({ children }) => {
             >
               {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
             </button>
-            <button className="admin-icon-button" type="button" title="Thông báo">
-              <Bell size={19} />
-              <span className="admin-notification-dot"></span>
-            </button>
+            <NotificationBell />
             <button className="admin-icon-button" type="button" title="Tin nhắn">
               <Mail size={19} />
               <span className="admin-notification-dot"></span>

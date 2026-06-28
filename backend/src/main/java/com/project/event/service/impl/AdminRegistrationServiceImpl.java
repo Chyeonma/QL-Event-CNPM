@@ -6,6 +6,7 @@ import com.project.event.entity.Registration;
 import com.project.event.entity.User;
 import com.project.event.repository.RegistrationRepository;
 import com.project.event.service.AdminRegistrationService;
+import com.project.event.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 public class AdminRegistrationServiceImpl implements AdminRegistrationService {
 
     private final RegistrationRepository registrationRepository;
+    private final NotificationService notificationService;
 
     private AdminRegistrationResponse mapToDto(Registration reg) {
         User student = reg.getStudent();
@@ -71,6 +73,15 @@ public class AdminRegistrationServiceImpl implements AdminRegistrationService {
         reg.setCheckedInAt(LocalDateTime.now());
         registrationRepository.save(reg);
 
+        if (reg.getStudent() != null && reg.getEvent() != null) {
+            notificationService.sendNotification(
+                    reg.getStudent().getId(),
+                    reg.getEvent().getId(),
+                    "✅ Điểm danh thành công",
+                    "Bạn đã được ghi nhận điểm danh tại sự kiện: " + reg.getEvent().getTitle() + " (+" + reg.getEvent().getTrainingPoints() + " điểm rèn luyện)."
+            );
+        }
+
         return new MessageResponse("Điểm danh thủ công thành công");
     }
 
@@ -83,6 +94,15 @@ public class AdminRegistrationServiceImpl implements AdminRegistrationService {
         reg.setStatus("CANCELLED");
         registrationRepository.save(reg);
 
+        if (reg.getStudent() != null && reg.getEvent() != null) {
+            notificationService.sendNotification(
+                    reg.getStudent().getId(),
+                    reg.getEvent().getId(),
+                    "⚠️ Hủy suất tham dự",
+                    "Suất đăng ký tham dự sự kiện '" + reg.getEvent().getTitle() + "' của bạn đã bị hủy bởi Ban tổ chức."
+            );
+        }
+
         return new MessageResponse("Đã hủy suất đăng ký tham gia của sinh viên");
     }
 
@@ -94,6 +114,15 @@ public class AdminRegistrationServiceImpl implements AdminRegistrationService {
 
         reg.setCheckedInAt(null);
         registrationRepository.save(reg);
+
+        if (reg.getStudent() != null && reg.getEvent() != null) {
+            notificationService.sendNotification(
+                    reg.getStudent().getId(),
+                    reg.getEvent().getId(),
+                    "ℹ️ Cập nhật trạng thái điểm danh",
+                    "Trạng thái điểm danh của bạn tại sự kiện '" + reg.getEvent().getTitle() + "' đã được chuyển về chưa điểm danh."
+            );
+        }
 
         return new MessageResponse("Đã hủy điểm danh của sinh viên");
     }

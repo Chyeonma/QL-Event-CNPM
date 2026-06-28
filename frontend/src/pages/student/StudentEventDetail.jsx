@@ -3,9 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Calendar, MapPin, Users, Award, Clock, ArrowLeft, 
   CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Share2, Sparkles, Target, Loader2, Lock,
-  Shield, Search, UserCheck, UserX
+  Shield, Search, UserCheck, UserX, Send
 } from 'lucide-react';
 import { publicEventService } from '../../services/publicEventService';
+import SendNotificationModal from '../../components/SendNotificationModal';
 
 const StudentEventDetail = () => {
   const { id } = useParams();
@@ -20,6 +21,7 @@ const StudentEventDetail = () => {
   const [registrations, setRegistrations] = useState([]);
   const [searchReg, setSearchReg] = useState('');
   const [activeTab, setActiveTab] = useState('info'); // 'info' | 'management'
+  const [showNotifModal, setShowNotifModal] = useState(false);
 
   const fetchDetail = async () => {
     try {
@@ -85,6 +87,10 @@ const StudentEventDetail = () => {
   };
 
   const handleCancel = async () => {
+    if (event?.userRegistrationStatus === 'CHECKED_IN') {
+      alert('Bạn đã được điểm danh thành công nên không thể hủy đăng ký.');
+      return;
+    }
     if (!window.confirm('Bạn có chắc chắn muốn hủy đăng ký tham gia sự kiện này?')) return;
     try {
       setActionLoading(true);
@@ -389,6 +395,15 @@ const StudentEventDetail = () => {
                   Thời hạn tiếp nhận đăng ký và điểm danh đã chính thức kết thúc. Hẹn gặp lại bạn ở các chương trình sau nhé!
                 </p>
               </div>
+            ) : event.userRegistrationStatus === 'CHECKED_IN' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ background: '#ecfdf5', border: '2px solid #10b981', color: '#047857', padding: '16px', borderRadius: '16px', textAlign: 'center', fontWeight: '800', fontSize: '15.5px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.15)' }}>
+                  <CheckCircle2 size={22} color="#10b981" /> Bạn đã được điểm danh thành công!
+                </div>
+                <p style={{ fontSize: '13px', color: '#64748b', margin: 0, textAlign: 'center', fontStyle: 'italic', lineHeight: '1.4' }}>
+                  * Sự kiện đã ghi nhận sự tham gia hợp lệ của bạn (+{event.trainingPoints || 5} ĐRL). Không thể hủy đăng ký sau khi đã điểm danh.
+                </p>
+              </div>
             ) : event.isRegistered ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', color: '#065f46', padding: '14px', borderRadius: '12px', textAlign: 'center', fontWeight: '700', fontSize: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
@@ -468,8 +483,8 @@ const StudentEventDetail = () => {
             </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <div style={{ position: 'relative', width: '350px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ position: 'relative', width: '350px', maxWidth: '100%' }}>
               <Search size={18} color="#94a3b8" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="search"
@@ -479,6 +494,27 @@ const StudentEventDetail = () => {
                 style={{ width: '100%', padding: '10px 14px 10px 42px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none' }}
               />
             </div>
+            <button
+              type="button"
+              onClick={() => setShowNotifModal(true)}
+              style={{
+                padding: '10px 20px',
+                borderRadius: '10px',
+                border: 'none',
+                background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                color: '#ffffff',
+                fontWeight: '700',
+                fontSize: '14px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)',
+                transition: 'all 0.2s'
+              }}
+            >
+              <Send size={16} /> Gửi thông báo cho SV
+            </button>
           </div>
 
           <div style={{ overflowX: 'auto' }}>
@@ -556,6 +592,13 @@ const StudentEventDetail = () => {
         </div>
       )}
 
+      <SendNotificationModal
+        isOpen={showNotifModal}
+        onClose={() => setShowNotifModal(false)}
+        eventId={id}
+        eventTitle={event?.title}
+        onSuccess={(msg) => alert(msg)}
+      />
     </div>
   );
 };

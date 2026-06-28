@@ -19,8 +19,10 @@ import {
   Download,
   Trash2,
   Shield,
-  UserPlus
+  UserPlus,
+  Send
 } from 'lucide-react';
+import SendNotificationModal from '../../components/SendNotificationModal';
 
 const AdminEventDetail = () => {
   const { id } = useParams();
@@ -30,6 +32,7 @@ const AdminEventDetail = () => {
   const [searchStudent, setSearchStudent] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showNotifModal, setShowNotifModal] = useState(false);
 
   const [eventData, setEventData] = useState(null);
   const [editData, setEditData] = useState(null);
@@ -551,6 +554,28 @@ const AdminEventDetail = () => {
                       <button className="btn btn-secondary" style={{ background: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Download size={16} /> Xuất Excel
                       </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setShowNotifModal(true)}
+                        style={{
+                          padding: '10px 18px',
+                          borderRadius: '8px',
+                          border: 'none',
+                          background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                          color: '#ffffff',
+                          fontWeight: '700',
+                          fontSize: '14px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        <Send size={16} /> Gửi thông báo
+                      </button>
                     </div>
                   </div>
 
@@ -729,6 +754,14 @@ const AdminEventDetail = () => {
 
         </div>
       </section>
+
+      <SendNotificationModal
+        isOpen={showNotifModal}
+        onClose={() => setShowNotifModal(false)}
+        eventId={id}
+        eventTitle={eventData?.title}
+        onSuccess={(msg) => alert(msg)}
+      />
     </div>
   );
 };

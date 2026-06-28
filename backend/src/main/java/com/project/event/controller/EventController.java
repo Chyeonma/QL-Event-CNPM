@@ -124,4 +124,13 @@ public class EventController {
             @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(eventManagerService.cancelCheckInForManager(registrationId, user.getId()));
     }
+
+    @PostMapping("/{id}/notifications")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<MessageResponse> sendNotificationForManager(
+            @PathVariable UUID id,
+            @RequestBody @jakarta.validation.Valid SendNotificationRequest request,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(eventManagerService.sendNotificationForManager(id, request, user.getId()));
+    }
 }

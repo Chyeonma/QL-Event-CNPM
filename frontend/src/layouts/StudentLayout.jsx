@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { BookOpen, Map, User, LogOut, CheckSquare, Home as HomeIcon, GraduationCap, Bell, Menu, Calendar } from 'lucide-react';
 import '../educampus.css';
+import NotificationBell from '../components/NotificationBell';
 
 const StudentLayout = ({ children }) => {
   const { user, logout } = useAuth();
@@ -46,7 +47,7 @@ const StudentLayout = ({ children }) => {
         </div>
 
         <div className="edu-nav-actions" style={{ position: 'relative' }}>
-          <button className="edu-btn-icon"><Bell size={18} /></button>
+          <NotificationBell />
           
           {/* Khu vực trang cá nhân góc trên bên phải */}
           <div 

@@ -4,6 +4,7 @@ import com.project.event.dto.AddEventManagerRequest;
 import com.project.event.dto.AdminRegistrationResponse;
 import com.project.event.dto.EventManagerResponse;
 import com.project.event.dto.MessageResponse;
+import com.project.event.dto.SendNotificationRequest;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,4 +18,5 @@ public interface EventManagerService {
     List<AdminRegistrationResponse> getEventRegistrationsForManager(UUID eventId, UUID currentUserId);
     MessageResponse manualCheckInForManager(UUID registrationId, UUID currentUserId);
     MessageResponse cancelCheckInForManager(UUID registrationId, UUID currentUserId);
+    MessageResponse sendNotificationForManager(UUID eventId, SendNotificationRequest request, UUID currentUserId);
 }
