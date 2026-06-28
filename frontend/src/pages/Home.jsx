@@ -26,11 +26,10 @@ const Home = () => {
             <span className="edu-brand-text">PTIT Events</span>
           </div>
           <div className="edu-nav-links">
-            <span className="active">Trang chủ</span>
-            <span onClick={() => navigate('/dashboard')}>Sinh viên</span>
-            <span>Ban tổ chức</span>
-            <span onClick={() => navigate('/admin')}>Quản trị</span>
-            <span onClick={() => navigate('/explore')}>Sự kiện</span>
+            <span className="active" onClick={() => navigate('/')}>Trang chủ</span>
+            <span onClick={() => navigate('/explore')}>Khám phá</span>
+            <span onClick={() => navigate('/dashboard')}>Đăng ký</span>
+            <span onClick={() => navigate('/profile')}>Trang cá nhân</span>
           </div>
           <div className="edu-nav-actions">
             {user ? <NotificationBell /> : <button className="edu-btn-icon" onClick={() => navigate('/login')}><Bell size={18} /></button>}

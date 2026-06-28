@@ -27,7 +27,6 @@ const menuSections = [
     items: [
       { label: 'Dashboard', icon: LayoutDashboard, to: '/admin' },
       { label: 'Sự kiện', icon: CalendarDays, to: '/admin/events' },
-      { label: 'Đăng ký', icon: ClipboardCheck },
       { 
         label: 'Người dùng', 
         icon: Users, 
@@ -52,7 +51,6 @@ const menuSections = [
     title: 'TÀI KHOẢN',
     items: [
       { label: 'Hồ sơ', icon: ShieldCheck, to: '/profile' },
-      { label: 'Cài đặt', icon: Settings },
     ],
   },
 ];

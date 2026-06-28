@@ -15,9 +15,17 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
 
     List<Notification> findByUserIdOrderByCreatedAtDesc(UUID userId);
 
+    List<Notification> findAllByOrderByCreatedAtDesc();
+
     long countByUserIdAndIsReadFalse(UUID userId);
+
+    long countByIsReadFalse();
 
     @Modifying
     @Query("UPDATE Notification n SET n.isRead = true WHERE n.user.id = :userId AND n.isRead = false")
     void markAllAsReadByUserId(@Param("userId") UUID userId);
+
+    @Modifying
+    @Query("UPDATE Notification n SET n.isRead = true WHERE n.isRead = false")
+    void markAllAsRead();
 }

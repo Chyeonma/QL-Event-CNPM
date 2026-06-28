@@ -21,18 +21,18 @@ public class NotificationController {
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getMyNotifications(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(notificationService.getUserNotifications(user.getId()));
+        return ResponseEntity.ok(notificationService.getUserNotifications(user));
     }
 
     @PutMapping("/{id}/read")
     public ResponseEntity<Void> markAsRead(@PathVariable UUID id, @AuthenticationPrincipal User user) {
-        notificationService.markAsRead(id, user.getId());
+        notificationService.markAsRead(id, user);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/read-all")
     public ResponseEntity<Void> markAllAsRead(@AuthenticationPrincipal User user) {
-        notificationService.markAllAsRead(user.getId());
+        notificationService.markAllAsRead(user);
         return ResponseEntity.ok().build();
     }
 }

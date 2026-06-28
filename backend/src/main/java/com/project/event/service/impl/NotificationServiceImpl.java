@@ -79,9 +79,19 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional(readOnly = true)
-    public Map<String, Object> getUserNotifications(UUID userId) {
-        List<Notification> list = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
-        long unreadCount = notificationRepository.countByUserIdAndIsReadFalse(userId);
+    public Map<String, Object> getUserNotifications(User user) {
+        List<Notification> list;
+        long unreadCount;
+        if (user != null && "ADMIN".equals(user.getRole())) {
+            list = notificationRepository.findAllByOrderByCreatedAtDesc();
+            unreadCount = notificationRepository.countByIsReadFalse();
+        } else if (user != null) {
+            list = notificationRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
+            unreadCount = notificationRepository.countByUserIdAndIsReadFalse(user.getId());
+        } else {
+            list = Collections.emptyList();
+            unreadCount = 0;
+        }
 
         List<NotificationResponse> responses = list.stream().map(n -> NotificationResponse.builder()
                 .id(n.getId())
@@ -102,11 +112,11 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional
-    public void markAsRead(UUID notificationId, UUID userId) {
+    public void markAsRead(UUID notificationId, User user) {
         Optional<Notification> opt = notificationRepository.findById(notificationId);
-        if (opt.isPresent()) {
+        if (opt.isPresent() && user != null) {
             Notification n = opt.get();
-            if (n.getUser().getId().equals(userId)) {
+            if ("ADMIN".equals(user.getRole()) || n.getUser().getId().equals(user.getId())) {
                 n.setIsRead(true);
                 notificationRepository.save(n);
             }
@@ -115,7 +125,11 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional
-    public void markAllAsRead(UUID userId) {
-        notificationRepository.markAllAsReadByUserId(userId);
+    public void markAllAsRead(User user) {
+        if (user != null && "ADMIN".equals(user.getRole())) {
+            notificationRepository.markAllAsRead();
+        } else if (user != null) {
+            notificationRepository.markAllAsReadByUserId(user.getId());
+        }
     }
 }

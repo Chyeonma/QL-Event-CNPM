@@ -132,7 +132,6 @@ const AdminUsers = () => {
               <th>Họ và Tên</th>
               <th>Email</th>
               <th>Lớp</th>
-              <th>Điểm RL</th>
               <th>Thao tác</th>
             </tr>
           </thead>
@@ -143,7 +142,6 @@ const AdminUsers = () => {
                 <td>{s.name}</td>
                 <td style={{ color: '#6b7280' }}>{s.email}</td>
                 <td>{s.class}</td>
-                <td><span style={{ fontWeight: '600', color: 'var(--primary-color)' }}>{s.points}</span></td>
                 <td>
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <button className="admin-icon-button" title="Chỉnh sửa" onClick={() => handleOpenEdit(s.id)}><Edit size={16} /></button>
@@ -157,7 +155,7 @@ const AdminUsers = () => {
               </tr>
             ))}
             {filtered.length === 0 && (
-              <tr><td colSpan="6" style={{textAlign: 'center', padding: '30px', color: '#6b7280'}}>Không có tài khoản nào</td></tr>
+              <tr><td colSpan="5" style={{textAlign: 'center', padding: '30px', color: '#6b7280'}}>Không có tài khoản nào</td></tr>
             )}
           </tbody>
         </table>

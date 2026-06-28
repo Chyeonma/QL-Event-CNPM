@@ -9,7 +9,7 @@ const StudentLayout = ({ children }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const navItems = [
@@ -39,11 +39,15 @@ const StudentLayout = ({ children }) => {
         </div>
         
         <div className="edu-nav-links">
-          <span className={location.pathname === '/' ? 'active' : ''} onClick={() => navigate('/')}>Trang chủ</span>
-          <span className={location.pathname === '/dashboard' ? 'active' : ''} onClick={() => navigate('/dashboard')}>Sinh viên</span>
-          <span>Ban tổ chức</span>
-          <span onClick={() => navigate('/admin')}>Quản trị</span>
-          <span className={location.pathname === '/explore' ? 'active' : ''} onClick={() => navigate('/explore')}>Sự kiện</span>
+          {navItems.map(item => (
+            <span 
+              key={item.path}
+              className={location.pathname === item.path ? 'active' : ''} 
+              onClick={() => navigate(item.path)}
+            >
+              {item.label}
+            </span>
+          ))}
         </div>
 
         <div className="edu-nav-actions" style={{ position: 'relative' }}>
@@ -130,7 +134,7 @@ const StudentLayout = ({ children }) => {
               <div 
                 key={item.path} 
                 className={`stu-nav-item ${location.pathname === item.path ? 'active' : ''}`}
-                onClick={() => navigate(item.path)}
+                onClick={() => { navigate(item.path); setIsSidebarOpen(false); }}
               >
                 {item.icon}
                 <span>{item.label}</span>
