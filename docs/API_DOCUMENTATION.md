@@ -31,6 +31,18 @@ Tài liệu này tổng hợp toàn bộ các endpoint RESTful API đang hoạt 
 | 2.5 | `GET` | `/api/events/my-registrations` | **Student** | Lấy danh sách toàn bộ các vé sự kiện mà sinh viên hiện tại đã đăng ký. |
 | 2.6 | `POST` | `/api/events/{id}/check-in` | **Student** | Sinh viên quét mã QR tại quầy Check-in để điểm danh tham dự. |
 
+### 🎯 2.1 Luồng Ban Tổ Chức & Cộng Tác Viên Sự Kiện (`EventController` - Manager Operations)
+*Base URL: `/api/events`*
+
+| STT | HTTP Method | Endpoint | Quyền (Role) | Chức năng chính |
+|:---:|:---|:---|:---:|:---|
+| 2.1.1 | `GET` | `/api/events/{id}/managers` | **Public / Authenticated** | Lấy danh sách các tài khoản được phân quyền Quản lý/CTV của sự kiện. |
+| 2.1.2 | `POST` | `/api/events/{id}/managers` | **Admin / Manager** | Cấp quyền Quản lý/CTV sự kiện cho tài khoản bằng Email hoặc Mã sinh viên. |
+| 2.1.3 | `DELETE` | `/api/events/{id}/managers/{userId}` | **Admin / Manager** | Thu hồi quyền Quản lý/CTV của một tài khoản khỏi sự kiện. |
+| 2.1.4 | `GET` | `/api/events/{id}/registrations` | **Manager / Admin** | Ban tổ chức xem danh sách sinh viên đăng ký tại trang sự kiện công khai. |
+| 2.1.5 | `POST` | `/api/events/registrations/{regId}/manual-check-in` | **Manager / Admin** | Ban tổ chức thực hiện điểm danh thủ công cho sinh viên. |
+| 2.1.6 | `POST` | `/api/events/registrations/{regId}/cancel-check-in` | **Manager / Admin** | Ban tổ chức hủy điểm danh (hoàn tác về trạng thái Chờ check-in). |
+
 ---
 
 ## 🛠️ 3. Luồng Quản lý Sự kiện (`AdminEventController`)
@@ -68,4 +80,5 @@ Tài liệu này tổng hợp toàn bộ các endpoint RESTful API đang hoạt 
 | 5.1 | `GET` | `/api/admin/events/{eventId}/registrations` | **Admin / Manager** | Xem danh sách toàn bộ sinh viên đã đăng ký tham gia một sự kiện cụ thể. |
 | 5.2 | `GET` | `/api/admin/events/registrations/all` | **Admin / Manager** | Lấy tổng hợp tất cả lượt đăng ký sự kiện trên toàn hệ thống. |
 | 5.3 | `POST` | `/api/admin/events/registrations/{regId}/check-in` | **Admin / Manager** | Cán bộ quản lý điểm danh thủ công cho sinh viên tại sự kiện. |
-| 5.4 | `DELETE` | `/api/admin/events/registrations/{regId}` | **Admin / Manager** | Ban tổ chức hủy suất đăng ký tham gia của sinh viên. |
+| 5.4 | `POST` | `/api/admin/events/registrations/{regId}/cancel-check-in` | **Admin / Manager** | Cán bộ quản lý hủy điểm danh cho sinh viên (hoàn tác về Chờ check-in). |
+| 5.5 | `DELETE` | `/api/admin/events/registrations/{regId}` | **Admin / Manager** | Ban tổ chức hủy suất đăng ký tham gia của sinh viên. |

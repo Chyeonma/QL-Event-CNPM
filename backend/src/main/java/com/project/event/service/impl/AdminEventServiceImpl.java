@@ -11,6 +11,8 @@ import com.project.event.entity.User;
 import com.project.event.repository.EventRepository;
 import com.project.event.repository.RegistrationRepository;
 import com.project.event.repository.UserRepository;
+import com.project.event.dto.EventManagerResponse;
+import com.project.event.repository.EventManagerRepository;
 import com.project.event.service.AdminEventService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,7 @@ public class AdminEventServiceImpl implements AdminEventService {
     private final EventRepository eventRepository;
     private final RegistrationRepository registrationRepository;
     private final UserRepository userRepository;
+    private final EventManagerRepository eventManagerRepository;
 
     @Override
     @Transactional
@@ -173,6 +176,21 @@ public class AdminEventServiceImpl implements AdminEventService {
                 .map(img -> new EventImageDto(img.getId(), img.getImageUrl(), img.getDisplayOrder()))
                 .collect(Collectors.toList());
 
+        List<EventManagerResponse> managerDtos = eventManagerRepository.findByEventId(event.getId()).stream()
+                .map(em -> {
+                    User u = em.getUser();
+                    return EventManagerResponse.builder()
+                            .id(em.getId())
+                            .userId(u != null ? u.getId() : null)
+                            .studentCode(u != null ? u.getStudentCode() : "N/A")
+                            .fullName(u != null ? u.getFullName() : "Unknown")
+                            .email(u != null ? u.getEmail() : "N/A")
+                            .role(u != null ? u.getRole() : "STUDENT")
+                            .assignedAt(em.getAssignedAt())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
         return EventResponse.builder()
                 .id(event.getId())
                 .title(event.getTitle())
@@ -186,8 +204,10 @@ public class AdminEventServiceImpl implements AdminEventService {
                 .createdAt(event.getCreatedAt())
                 .totalRegistrations(totalRegistrations)
                 .checkedInCount(checkedInCount)
+                .isManager(true)
                 .targets(targetDtos)
                 .images(imageDtos)
+                .managers(managerDtos)
                 .build();
     }
 }

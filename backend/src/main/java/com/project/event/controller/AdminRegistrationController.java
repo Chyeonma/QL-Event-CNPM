@@ -37,6 +37,12 @@ public class AdminRegistrationController {
         return ResponseEntity.ok(adminRegistrationService.manualCheckIn(registrationId));
     }
 
+    // 2.1. Hủy điểm danh
+    @PostMapping("/registrations/{registrationId}/cancel-check-in")
+    public ResponseEntity<MessageResponse> cancelCheckIn(@PathVariable UUID registrationId) {
+        return ResponseEntity.ok(adminRegistrationService.cancelCheckIn(registrationId));
+    }
+
     // 3. Hủy suất đăng ký của sinh viên
     @DeleteMapping("/registrations/{registrationId}")
     public ResponseEntity<MessageResponse> cancelRegistration(@PathVariable UUID registrationId) {

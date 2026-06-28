@@ -21,6 +21,15 @@ STT,HTTP Method,Tên,Endpoint,Quyền (Role),Chức năng chính,Backend
 3.5,GET,Vé đã đăng ký,/api/events/my-registrations,Student,Lấy danh sách toàn bộ các sự kiện mà sinh viên hiện tại đã đăng ký,TRUE
 3.6,POST,Quét QR Điểm danh,/api/events/{id}/check-in,Student,Sinh viên quét mã QR tại quầy để xác nhận điểm danh,TRUE
 ,,,,,,
+Luồng Ban Tổ Chức & Cộng Tác Viên Sự Kiện (EventController - Manager Operations),,,,,quản lý CTV và điểm danh tại trang sự kiện công khai,
+STT,HTTP Method,Tên,Endpoint,Quyền (Role),Chức năng chính,Backend
+3.7.1,GET,Danh sách quản lý sự kiện,/api/events/{id}/managers,Public/Authenticated,Lấy danh sách tài khoản được phân quyền Quản lý/CTV của sự kiện,TRUE
+3.7.2,POST,Cấp quyền quản lý sự kiện,/api/events/{id}/managers,Admin & Manager,Cấp quyền Quản lý/CTV sự kiện bằng Email hoặc Mã sinh viên,TRUE
+3.7.3,DELETE,Thu hồi quyền quản lý,/api/events/{id}/managers/{userId},Admin & Manager,Thu hồi quyền Quản lý/CTV của tài khoản khỏi sự kiện,TRUE
+3.7.4,GET,Danh sách đăng ký cho Manager,/api/events/{id}/registrations,Admin & Manager,Ban tổ chức xem danh sách sinh viên đăng ký tại trang sự kiện,TRUE
+3.7.5,POST,Điểm danh cho Manager,/api/events/registrations/{regId}/manual-check-in,Admin & Manager,Ban tổ chức thực hiện điểm danh thủ công cho sinh viên,TRUE
+3.7.6,POST,Hủy điểm danh cho Manager,/api/events/registrations/{regId}/cancel-check-in,Admin & Manager,Ban tổ chức hủy điểm danh (hoàn tác về trạng thái Chờ check-in),TRUE
+,,,,,,
 Luồng Quản lý Sự kiện (AdminEventController),,,,,dành cho Admin & Ban tổ chức thao tác với sự kiện,
 STT,HTTP Method,Tên,Endpoint,Quyền (Role),Chức năng chính,Backend
 4.1,GET,Toàn bộ sự kiện,/api/admin/events,Admin & Manager,Xem danh sách tất cả sự kiện trong hệ thống (mọi trạng thái DRAFT/PUBLISHED/CLOSED),TRUE
@@ -43,4 +52,5 @@ STT,HTTP Method,Tên,Endpoint,Quyền (Role),Chức năng chính,Backend
 6.1,GET,Danh sách đăng ký theo sự kiện,/api/admin/events/{eventId}/registrations,Admin & Manager,Xem danh sách sinh viên đã đăng ký tham gia một sự kiện cụ thể,TRUE
 6.2,GET,Toàn bộ danh sách đăng ký hệ thống,/api/admin/events/registrations/all,Admin & Manager,Lấy danh sách tất cả lượt đăng ký sự kiện trên toàn hệ thống,TRUE
 6.3,POST,Điểm danh thủ công,/api/admin/events/registrations/{regId}/check-in,Admin & Manager,Cán bộ quản lý xác nhận điểm danh thủ công cho sinh viên,TRUE
-6.4,DELETE,Hủy suất đăng ký,/api/admin/events/registrations/{regId},Admin & Manager,Ban tổ chức hủy suất đăng ký tham gia của sinh viên,TRUE
+6.4,POST,Hủy điểm danh thủ công,/api/admin/events/registrations/{regId}/cancel-check-in,Admin & Manager,Cán bộ quản lý hủy điểm danh cho sinh viên (hoàn tác về Chờ check-in),TRUE
+6.5,DELETE,Hủy suất đăng ký,/api/admin/events/registrations/{regId},Admin & Manager,Ban tổ chức hủy suất đăng ký tham gia của sinh viên,TRUE

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { adminEventService } from '../../services/adminEventService';
 import { adminRegistrationService } from '../../services/adminRegistrationService';
+import { publicEventService } from '../../services/publicEventService';
 import { 
   ArrowLeft, 
   Save, 
@@ -16,13 +17,16 @@ import {
   Target,
   ImagePlus,
   Download,
-  Trash2
+  Trash2,
+  Shield,
+  UserPlus
 } from 'lucide-react';
 
 const AdminEventDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('general'); // tabs: 'general', 'targets', 'checkin'
+  const [checkinSubTab, setCheckinSubTab] = useState('registrants'); // 'registrants' | 'managers'
   const [searchStudent, setSearchStudent] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -31,6 +35,9 @@ const AdminEventDetail = () => {
   const [editData, setEditData] = useState(null);
   const [newImageUrl, setNewImageUrl] = useState('');
   const [registrations, setRegistrations] = useState([]);
+  const [managers, setManagers] = useState([]);
+  const [managerInput, setManagerInput] = useState('');
+  const [isAddingManager, setIsAddingManager] = useState(false);
 
   const handleAddImageUrl = () => {
     if (!newImageUrl || !newImageUrl.trim()) return;
@@ -51,7 +58,42 @@ const AdminEventDetail = () => {
   useEffect(() => {
     fetchEventDetail();
     fetchRegistrations();
+    fetchManagers();
   }, [id]);
+
+  const fetchManagers = async () => {
+    try {
+      const data = await publicEventService.getEventManagers(id);
+      setManagers(data || []);
+    } catch (err) {
+      console.error("Lỗi tải danh sách quản lý:", err);
+    }
+  };
+
+  const handleAddManager = async (e) => {
+    e.preventDefault();
+    if (!managerInput || !managerInput.trim()) return;
+    setIsAddingManager(true);
+    try {
+      await publicEventService.addEventManager(id, managerInput.trim());
+      setManagerInput('');
+      fetchManagers();
+    } catch (err) {
+      alert(err.response?.data?.message || err.message || "Lỗi khi thêm quản lý");
+    } finally {
+      setIsAddingManager(false);
+    }
+  };
+
+  const handleRemoveManager = async (userId, name) => {
+    if (!window.confirm(`Bạn có chắc muốn xóa quyền quản lý sự kiện của "${name}"?`)) return;
+    try {
+      await publicEventService.removeEventManager(id, userId);
+      fetchManagers();
+    } catch (err) {
+      alert(err.response?.data?.message || err.message || "Lỗi khi xóa quản lý");
+    }
+  };
 
   const fetchRegistrations = async () => {
     try {
@@ -69,6 +111,16 @@ const AdminEventDetail = () => {
       fetchEventDetail();
     } catch (err) {
       alert(err.response?.data?.message || err.message || "Lỗi điểm danh");
+    }
+  };
+
+  const handleCancelCheckIn = async (regId) => {
+    try {
+      await adminRegistrationService.cancelCheckIn(regId);
+      fetchRegistrations();
+      fetchEventDetail();
+    } catch (err) {
+      alert(err.response?.data?.message || err.message || "Lỗi hủy điểm danh");
     }
   };
 
@@ -426,108 +478,252 @@ const AdminEventDetail = () => {
           {/* TAB 3: ĐĂNG KÝ VÀ ĐIỂM DANH */}
           {activeTab === 'checkin' && (
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <label className="admin-search" style={{ margin: 0, width: '300px' }}>
-                  <Search size={18} />
-                  <input 
-                    placeholder="Tìm theo Tên hoặc Mã SV..." 
-                    type="search" 
-                    value={searchStudent}
-                    onChange={(e) => setSearchStudent(e.target.value)}
-                  />
-                </label>
+              {/* SUB-TABS NAVIGATION */}
+              <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', borderBottom: '1px solid #e5e7eb', paddingBottom: '16px' }}>
+                <button
+                  type="button"
+                  onClick={() => setCheckinSubTab('registrants')}
+                  style={{
+                    padding: '10px 20px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: checkinSubTab === 'registrants' ? 'var(--primary-color)' : '#f3f4f6',
+                    color: checkinSubTab === 'registrants' ? '#fff' : '#4b5563',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  <Users size={18} /> Danh sách Sinh viên Đăng ký ({registrations.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCheckinSubTab('managers')}
+                  style={{
+                    padding: '10px 20px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: checkinSubTab === 'managers' ? 'var(--primary-color)' : '#f3f4f6',
+                    color: checkinSubTab === 'managers' ? '#fff' : '#4b5563',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  <Shield size={18} /> Quản lý Sự kiện & CTV ({managers.length})
+                </button>
+              </div>
 
-                <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', gap: '16px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                      <span style={{ fontSize: '13px', color: '#6b7280' }}>Tổng đăng ký</span>
-                      <strong style={{ fontSize: '16px' }}>95 / 120</strong>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                      <span style={{ fontSize: '13px', color: '#6b7280' }}>Đã điểm danh</span>
-                      <strong style={{ fontSize: '16px', color: 'var(--primary-color)' }}>2 / 95</strong>
+              {/* SUB-TAB 1: DANH SÁCH ĐĂNG KÝ */}
+              {checkinSubTab === 'registrants' && (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                    <label className="admin-search" style={{ margin: 0, width: '300px' }}>
+                      <Search size={18} />
+                      <input 
+                        placeholder="Tìm theo Tên hoặc Mã SV..." 
+                        type="search" 
+                        value={searchStudent}
+                        onChange={(e) => setSearchStudent(e.target.value)}
+                      />
+                    </label>
+
+                    <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', gap: '16px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                          <span style={{ fontSize: '13px', color: '#6b7280' }}>Tổng đăng ký</span>
+                          <strong style={{ fontSize: '16px' }}>{registrations.length} / {eventData?.capacity || 0}</strong>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                          <span style={{ fontSize: '13px', color: '#6b7280' }}>Đã điểm danh</span>
+                          <strong style={{ fontSize: '16px', color: 'var(--primary-color)' }}>{registrations.filter(r => r.checkedInAt).length} / {registrations.length}</strong>
+                        </div>
+                      </div>
+
+                      <div style={{ width: '1px', height: '32px', background: '#dde5ef' }}></div>
+
+                      <button className="btn btn-secondary" style={{ background: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Download size={16} /> Xuất Excel
+                      </button>
                     </div>
                   </div>
 
-                  <div style={{ width: '1px', height: '32px', background: '#dde5ef' }}></div>
-
-                  <button className="btn btn-secondary" style={{ background: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Download size={16} /> Xuất Excel
-                  </button>
-                </div>
-              </div>
-
-              <div className="admin-table-wrap">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>STT</th>
-                      <th>Sinh viên</th>
-                      <th>Lớp</th>
-                      <th>Thời gian đăng ký</th>
-                      <th>Trạng thái</th>
-                      <th style={{ textAlign: 'right' }}>Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredRegistrants.map((student, index) => (
-                      <tr key={student.id} style={{ opacity: student.status === 'CANCELLED' ? 0.5 : 1 }}>
-                        <td>{index + 1}</td>
-                        <td>
-                          <div style={{ fontWeight: '600', color: '#111827' }}>{student.fullName}</div>
-                          <div style={{ fontSize: '13px', color: '#6b7280' }}>{student.studentCode}</div>
-                        </td>
-                        <td>{student.classCode}</td>
-                        <td style={{ color: '#6b7280' }}>
-                          {student.registeredAt ? new Date(student.registeredAt).toLocaleString('vi-VN') : ''}
-                        </td>
-                        <td>
-                          {student.status === 'CANCELLED' ? (
-                            <span style={{ color: '#ef4444', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <UserX size={16} /> Đã hủy suất
-                            </span>
-                          ) : student.checkedInAt ? (
-                            <span style={{ color: '#10b981', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <UserCheck size={16} /> Đã đến
-                            </span>
-                          ) : (
-                            <span style={{ color: '#f59e0b', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <Clock size={16} /> Chờ check-in
-                            </span>
-                          )}
-                        </td>
-                        <td style={{ textAlign: 'right' }}>
-                          {student.status !== 'CANCELLED' && (
-                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                              {!student.checkedInAt && (
-                                <button 
-                                  onClick={() => handleManualCheckIn(student.id)}
-                                  style={{ background: 'var(--primary-color)', color: '#fff', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', boxShadow: '0 2px 4px rgba(79, 70, 229, 0.2)' }}
-                                >
-                                  Điểm danh
-                                </button>
+                  <div className="admin-table-wrap">
+                    <table className="admin-table">
+                      <thead>
+                        <tr>
+                          <th>STT</th>
+                          <th>Sinh viên</th>
+                          <th>Lớp</th>
+                          <th>Thời gian đăng ký</th>
+                          <th>Trạng thái</th>
+                          <th style={{ textAlign: 'right' }}>Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredRegistrants.map((student, index) => (
+                          <tr key={student.id} style={{ opacity: student.status === 'CANCELLED' ? 0.5 : 1 }}>
+                            <td>{index + 1}</td>
+                            <td>
+                              <div style={{ fontWeight: '600', color: '#111827' }}>{student.fullName}</div>
+                              <div style={{ fontSize: '13px', color: '#6b7280' }}>{student.studentCode}</div>
+                            </td>
+                            <td>{student.classCode}</td>
+                            <td style={{ color: '#6b7280' }}>
+                              {student.registeredAt ? new Date(student.registeredAt).toLocaleString('vi-VN') : ''}
+                            </td>
+                            <td>
+                              {student.status === 'CANCELLED' ? (
+                                <span style={{ color: '#ef4444', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <UserX size={16} /> Đã hủy suất
+                                </span>
+                              ) : student.checkedInAt ? (
+                                <span style={{ color: '#10b981', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <UserCheck size={16} /> Đã đến
+                                </span>
+                              ) : (
+                                <span style={{ color: '#f59e0b', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <Clock size={16} /> Chờ check-in
+                                </span>
                               )}
-                              <button 
-                                onClick={() => handleCancelReg(student.id)}
-                                style={{ background: '#fef2f2', color: '#ef4444', border: '1px solid #fca5a5', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}
+                            </td>
+                            <td style={{ textAlign: 'right' }}>
+                              {student.status !== 'CANCELLED' && (
+                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                  {!student.checkedInAt ? (
+                                    <button 
+                                      onClick={() => handleManualCheckIn(student.id)}
+                                      style={{ background: 'var(--primary-color)', color: '#fff', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', boxShadow: '0 2px 4px rgba(79, 70, 229, 0.2)' }}
+                                    >
+                                      Điểm danh
+                                    </button>
+                                  ) : (
+                                    <button 
+                                      onClick={() => handleCancelCheckIn(student.id)}
+                                      style={{ background: '#ffedd5', color: '#c2410c', border: '1px solid #fdba74', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}
+                                    >
+                                      Hủy điểm danh
+                                    </button>
+                                  )}
+                                  <button 
+                                    onClick={() => handleCancelReg(student.id)}
+                                    style={{ background: '#fef2f2', color: '#ef4444', border: '1px solid #fca5a5', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}
+                                  >
+                                    Hủy suất
+                                  </button>
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                        {filteredRegistrants.length === 0 && (
+                          <tr>
+                            <td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-secondary)' }}>
+                              Không tìm thấy sinh viên nào khớp với tìm kiếm "{searchStudent}".
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* SUB-TAB 2: QUẢN LÝ SỰ KIỆN & CTV */}
+              {checkinSubTab === 'managers' && (
+                <div>
+                  <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '24px' }}>
+                    <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <UserPlus size={20} color="var(--primary-color)" /> Thêm Người quản lý / Cộng tác viên
+                    </h4>
+                    <p style={{ margin: '0 0 16px 0', fontSize: '14px', color: '#64748b' }}>
+                      Người được gán quyền sẽ có thể truy cập vào sự kiện này tại trang công khai để xem danh sách sinh viên đăng ký và thực hiện điểm danh thủ công.
+                    </p>
+                    <form onSubmit={handleAddManager} style={{ display: 'flex', gap: '12px', maxWidth: '500px' }}>
+                      <input
+                        type="text"
+                        className="admin-form-input"
+                        placeholder="Nhập Email hoặc Mã sinh viên..."
+                        value={managerInput}
+                        onChange={(e) => setManagerInput(e.target.value)}
+                        style={{ flex: 1, margin: 0 }}
+                      />
+                      <button
+                        type="submit"
+                        disabled={isAddingManager || !managerInput.trim()}
+                        className="btn btn-primary"
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}
+                      >
+                        <UserPlus size={16} /> {isAddingManager ? 'Đang cấp quyền...' : 'Cấp quyền'}
+                      </button>
+                    </form>
+                  </div>
+
+                  <div className="admin-table-wrap">
+                    <table className="admin-table">
+                      <thead>
+                        <tr>
+                          <th>STT</th>
+                          <th>Tài khoản</th>
+                          <th>Mã SV</th>
+                          <th>Vai trò hệ thống</th>
+                          <th>Ngày cấp quyền</th>
+                          <th style={{ textAlign: 'right' }}>Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {managers.map((m, index) => (
+                          <tr key={m.id}>
+                            <td>{index + 1}</td>
+                            <td>
+                              <div style={{ fontWeight: '600', color: '#111827' }}>{m.fullName}</div>
+                              <div style={{ fontSize: '13px', color: '#6b7280' }}>{m.email}</div>
+                            </td>
+                            <td>{m.studentCode || 'N/A'}</td>
+                            <td>
+                              <span style={{ 
+                                padding: '4px 10px', 
+                                borderRadius: '20px', 
+                                fontSize: '12px', 
+                                fontWeight: '600',
+                                background: m.role === 'ADMIN' ? '#fef3c7' : m.role === 'MANAGER' ? '#e0e7ff' : '#f1f5f9',
+                                color: m.role === 'ADMIN' ? '#d97706' : m.role === 'MANAGER' ? '#4f46e5' : '#475569'
+                              }}>
+                                {m.role}
+                              </span>
+                            </td>
+                            <td style={{ color: '#6b7280' }}>
+                              {m.assignedAt ? new Date(m.assignedAt).toLocaleString('vi-VN') : ''}
+                            </td>
+                            <td style={{ textAlign: 'right' }}>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveManager(m.userId, m.fullName)}
+                                style={{ background: '#fef2f2', color: '#ef4444', border: '1px solid #fca5a5', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                               >
-                                Hủy suất
+                                <Trash2 size={14} /> Thu hồi quyền
                               </button>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                    {filteredRegistrants.length === 0 && (
-                      <tr>
-                        <td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-secondary)' }}>
-                          Không tìm thấy sinh viên nào khớp với tìm kiếm "{searchStudent}".
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                            </td>
+                          </tr>
+                        ))}
+                        {managers.length === 0 && (
+                          <tr>
+                            <td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-secondary)' }}>
+                              Chưa có người quản lý / cộng tác viên nào được gán cho sự kiện này.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

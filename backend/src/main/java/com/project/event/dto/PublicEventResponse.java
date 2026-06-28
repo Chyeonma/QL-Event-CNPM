@@ -30,6 +30,9 @@ public class PublicEventResponse {
     private Boolean isRegistered;
     private String userRegistrationStatus; // REGISTERED, CANCELLED, CHECKED_IN, NONE
     
+    // Quyền hạn của user hiện tại trên sự kiện này
+    private Boolean isManager;
+    
     // Dữ liệu liên kết
     private List<EventTargetDto> targets;
     private List<EventImageDto> images;

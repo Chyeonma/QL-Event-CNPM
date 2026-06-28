@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Calendar, MapPin, Users, Award, Clock, ArrowLeft, 
-  CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Share2, Sparkles, Target, Loader2, Lock 
+  CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Share2, Sparkles, Target, Loader2, Lock,
+  Shield, Search, UserCheck, UserX
 } from 'lucide-react';
 import { publicEventService } from '../../services/publicEventService';
 
@@ -16,17 +17,53 @@ const StudentEventDetail = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
 
+  const [registrations, setRegistrations] = useState([]);
+  const [searchReg, setSearchReg] = useState('');
+  const [activeTab, setActiveTab] = useState('info'); // 'info' | 'management'
+
   const fetchDetail = async () => {
     try {
       setLoading(true);
       setError(null);
       const data = await publicEventService.getEventDetail(id);
       setEvent(data);
+      if (data?.isManager) {
+        fetchManagerRegistrations();
+      }
     } catch (err) {
       console.error(err);
       setError(err?.response?.data?.message || err?.message || 'Không thể tải chi tiết sự kiện');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchManagerRegistrations = async () => {
+    try {
+      const data = await publicEventService.getEventRegistrationsForManager(id);
+      setRegistrations(data || []);
+    } catch (err) {
+      console.error("Lỗi tải danh sách cho manager:", err);
+    }
+  };
+
+  const handleManualCheckIn = async (regId) => {
+    try {
+      await publicEventService.manualCheckInForManager(regId);
+      fetchManagerRegistrations();
+      fetchDetail();
+    } catch (err) {
+      alert(err?.response?.data?.message || err?.message || 'Lỗi điểm danh');
+    }
+  };
+
+  const handleCancelCheckIn = async (regId) => {
+    try {
+      await publicEventService.cancelCheckInForManager(regId);
+      fetchManagerRegistrations();
+      fetchDetail();
+    } catch (err) {
+      alert(err?.response?.data?.message || err?.message || 'Lỗi hủy điểm danh');
     }
   };
 
@@ -68,6 +105,11 @@ const StudentEventDetail = () => {
       weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' 
     }) + ' - ' + d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
   };
+
+  const filteredRegs = registrations.filter(r => 
+    (r.fullName || '').toLowerCase().includes(searchReg.toLowerCase()) ||
+    (r.studentCode || '').toLowerCase().includes(searchReg.toLowerCase())
+  );
 
   if (loading) {
     return (
@@ -211,7 +253,42 @@ const StudentEventDetail = () => {
         </div>
       </div>
 
+      {/* TABS DÀNH CHO MANAGER SỰ KIỆN */}
+      {event.isManager && (
+        <div style={{ maxWidth: '1200px', margin: '28px auto 0', padding: '0 24px' }}>
+          <div style={{ display: 'flex', gap: '12px', borderBottom: '2px solid #e2e8f0', paddingBottom: '16px' }}>
+            <button
+              onClick={() => setActiveTab('info')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                padding: '12px 24px', borderRadius: '12px', fontWeight: '700', fontSize: '15px', cursor: 'pointer',
+                border: 'none', transition: '0.2s',
+                background: activeTab === 'info' ? 'var(--edu-primary, #2563eb)' : '#f1f5f9',
+                color: activeTab === 'info' ? '#ffffff' : '#475569',
+                boxShadow: activeTab === 'info' ? '0 4px 12px rgba(37,99,235,0.3)' : 'none'
+              }}
+            >
+              <Calendar size={18} /> Thông tin Sự kiện
+            </button>
+            <button
+              onClick={() => setActiveTab('management')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                padding: '12px 24px', borderRadius: '12px', fontWeight: '700', fontSize: '15px', cursor: 'pointer',
+                border: 'none', transition: '0.2s',
+                background: activeTab === 'management' ? 'var(--edu-primary, #2563eb)' : '#f1f5f9',
+                color: activeTab === 'management' ? '#ffffff' : '#475569',
+                boxShadow: activeTab === 'management' ? '0 4px 12px rgba(37,99,235,0.3)' : 'none'
+              }}
+            >
+              <Shield size={18} /> Ban Tổ Chức & Quản lý Điểm danh
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 3. MAIN CONTENT LAYOUT (2 COLUMNS) */}
+      {activeTab === 'info' && (
       <div style={{ maxWidth: '1200px', margin: '32px auto 0', padding: '0 24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '32px', alignItems: 'start' }}>
         
         {/* CỘT TRÁI: THÔNG TIN CHI TIẾT GỘP CHUNG (65% width trên desktop) */}
@@ -367,6 +444,117 @@ const StudentEventDetail = () => {
         </div>
 
       </div>
+      )}
+
+      {/* KHU VỰC DÀNH CHO MANAGER SỰ KIỆN */}
+      {event.isManager && activeTab === 'management' && (
+        <div style={{ maxWidth: '1200px', margin: '32px auto 0', background: '#ffffff', borderRadius: '24px', border: '2px solid var(--edu-primary, #2563eb)', padding: '32px', boxShadow: '0 20px 25px -5px rgba(37,99,235,0.1)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', borderBottom: '1px solid #e2e8f0', paddingBottom: '16px', flexWrap: 'wrap', gap: '16px' }}>
+            <div>
+              <h3 style={{ margin: '0 0 6px 0', fontSize: '22px', fontWeight: '800', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Shield size={26} color="var(--edu-primary, #2563eb)" /> Khu Vực Ban Tổ Chức & Quản Lý Sự Kiện
+              </h3>
+              <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
+                Bạn được phân công quyền quản lý/CTV cho sự kiện này. Bạn có thể xem danh sách sinh viên đăng ký và thực hiện điểm danh thủ công tại đây.
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: '16px' }}>
+              <div style={{ background: '#f1f5f9', padding: '8px 16px', borderRadius: '10px', fontSize: '14px', fontWeight: '600', color: '#334155' }}>
+                Tổng đăng ký: <span style={{ color: '#0f172a' }}>{registrations.length}</span>
+              </div>
+              <div style={{ background: '#ecfdf5', padding: '8px 16px', borderRadius: '10px', fontSize: '14px', fontWeight: '600', color: '#065f46' }}>
+                Đã điểm danh: <span style={{ color: '#10b981' }}>{registrations.filter(r => r.checkedInAt).length}</span>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <div style={{ position: 'relative', width: '350px' }}>
+              <Search size={18} color="#94a3b8" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
+              <input
+                type="search"
+                placeholder="Tìm theo Tên hoặc Mã sinh viên..."
+                value={searchReg}
+                onChange={(e) => setSearchReg(e.target.value)}
+                style={{ width: '100%', padding: '10px 14px 10px 42px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none' }}
+              />
+            </div>
+          </div>
+
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
+              <thead>
+                <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0', color: '#475569' }}>
+                  <th style={{ padding: '12px 16px', fontWeight: '600' }}>STT</th>
+                  <th style={{ padding: '12px 16px', fontWeight: '600' }}>Sinh viên</th>
+                  <th style={{ padding: '12px 16px', fontWeight: '600' }}>Lớp</th>
+                  <th style={{ padding: '12px 16px', fontWeight: '600' }}>Thời gian đăng ký</th>
+                  <th style={{ padding: '12px 16px', fontWeight: '600' }}>Trạng thái</th>
+                  <th style={{ padding: '12px 16px', fontWeight: '600', textAlign: 'right' }}>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredRegs.map((student, index) => (
+                  <tr key={student.id} style={{ borderBottom: '1px solid #f1f5f9', opacity: student.status === 'CANCELLED' ? 0.5 : 1 }}>
+                    <td style={{ padding: '14px 16px' }}>{index + 1}</td>
+                    <td style={{ padding: '14px 16px' }}>
+                      <div style={{ fontWeight: '600', color: '#0f172a' }}>{student.fullName}</div>
+                      <div style={{ fontSize: '13px', color: '#64748b' }}>{student.studentCode}</div>
+                    </td>
+                    <td style={{ padding: '14px 16px' }}>{student.classCode}</td>
+                    <td style={{ padding: '14px 16px', color: '#64748b' }}>
+                      {student.registeredAt ? new Date(student.registeredAt).toLocaleString('vi-VN') : ''}
+                    </td>
+                    <td style={{ padding: '14px 16px' }}>
+                      {student.status === 'CANCELLED' ? (
+                        <span style={{ color: '#ef4444', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          <UserX size={16} /> Đã hủy suất
+                        </span>
+                      ) : student.checkedInAt ? (
+                        <span style={{ color: '#10b981', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          <UserCheck size={16} /> Đã điểm danh
+                        </span>
+                      ) : (
+                        <span style={{ color: '#f59e0b', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          <Clock size={16} /> Chờ check-in
+                        </span>
+                      )}
+                    </td>
+                    <td style={{ padding: '14px 16px', textAlign: 'right' }}>
+                      {student.status !== 'CANCELLED' && (
+                        !student.checkedInAt ? (
+                          <button
+                            type="button"
+                            onClick={() => handleManualCheckIn(student.id)}
+                            style={{ background: 'var(--edu-primary, #2563eb)', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', boxShadow: '0 2px 4px rgba(37,99,235,0.2)' }}
+                          >
+                            Điểm danh
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleCancelCheckIn(student.id)}
+                            style={{ background: '#ffedd5', color: '#c2410c', border: '1px solid #fdba74', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}
+                          >
+                            Hủy điểm danh
+                          </button>
+                        )
+                      )}
+                    </td>
+                  </tr>
+                ))}
+                {filteredRegs.length === 0 && (
+                  <tr>
+                    <td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: '#94a3b8' }}>
+                      Không tìm thấy sinh viên nào trong danh sách.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
     </div>
   );

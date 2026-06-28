@@ -85,4 +85,16 @@ public class AdminRegistrationServiceImpl implements AdminRegistrationService {
 
         return new MessageResponse("Đã hủy suất đăng ký tham gia của sinh viên");
     }
+
+    @Override
+    @Transactional
+    public MessageResponse cancelCheckIn(UUID registrationId) {
+        Registration reg = registrationRepository.findById(registrationId)
+                .orElseThrow(() -> new RuntimeException("Suất đăng ký không tồn tại"));
+
+        reg.setCheckedInAt(null);
+        registrationRepository.save(reg);
+
+        return new MessageResponse("Đã hủy điểm danh của sinh viên");
+    }
 }

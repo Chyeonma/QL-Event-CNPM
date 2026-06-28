@@ -29,7 +29,10 @@ public class EventResponse {
     private long totalRegistrations;
     private long checkedInCount;
     
+    private Boolean isManager;
+    
     // Các dữ liệu liên kết
     private List<EventTargetDto> targets;
     private List<EventImageDto> images;
+    private List<EventManagerResponse> managers;
 }

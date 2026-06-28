@@ -1,9 +1,8 @@
 package com.project.event.controller;
 
-import com.project.event.dto.MessageResponse;
-import com.project.event.dto.PublicEventResponse;
-import com.project.event.dto.StudentRegistrationResponse;
+import com.project.event.dto.*;
 import com.project.event.entity.User;
+import com.project.event.service.EventManagerService;
 import com.project.event.service.PublicEventService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +19,7 @@ import java.util.UUID;
 public class EventController {
 
     private final PublicEventService publicEventService;
+    private final EventManagerService eventManagerService;
 
     // 1. Lấy danh sách sự kiện đã công bố (Công khai)
     @GetMapping
@@ -65,12 +65,63 @@ public class EventController {
         return ResponseEntity.ok(publicEventService.getMyRegistrations(user.getId()));
     }
 
-    // 6. Quét QR Điểm danh sự kiện
+    // 6. Quét QR Điểm danh sự kiện (Dành cho sinh viên tự check-in nếu có QR)
     @PostMapping("/{id}/check-in")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<MessageResponse> checkInEvent(
             @PathVariable UUID id,
             @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(publicEventService.checkInEvent(id, user.getId()));
+    }
+
+    // --- CÁC ENDPOINT DÀNH CHO BAN TỔ CHỨC / QUẢN LÝ SỰ KIỆN ---
+
+    @GetMapping("/{id}/managers")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<EventManagerResponse>> getEventManagers(@PathVariable UUID id) {
+        return ResponseEntity.ok(eventManagerService.getEventManagers(id));
+    }
+
+    @PostMapping("/{id}/managers")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<EventManagerResponse> addEventManager(
+            @PathVariable UUID id,
+            @RequestBody AddEventManagerRequest request,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(eventManagerService.addEventManager(id, request, user.getId()));
+    }
+
+    @DeleteMapping("/{id}/managers/{userId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> removeEventManager(
+            @PathVariable UUID id,
+            @PathVariable UUID userId,
+            @AuthenticationPrincipal User user) {
+        eventManagerService.removeEventManager(id, userId, user.getId());
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}/registrations")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<AdminRegistrationResponse>> getEventRegistrationsForManager(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(eventManagerService.getEventRegistrationsForManager(id, user.getId()));
+    }
+
+    @PostMapping("/registrations/{registrationId}/manual-check-in")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<MessageResponse> manualCheckInForManager(
+            @PathVariable UUID registrationId,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(eventManagerService.manualCheckInForManager(registrationId, user.getId()));
+    }
+
+    @PostMapping("/registrations/{registrationId}/cancel-check-in")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<MessageResponse> cancelCheckInForManager(
+            @PathVariable UUID registrationId,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(eventManagerService.cancelCheckInForManager(registrationId, user.getId()));
     }
 }

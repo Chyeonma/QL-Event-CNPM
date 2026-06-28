@@ -16,6 +16,11 @@ export const adminRegistrationService = {
     return response.data;
   },
 
+  cancelCheckIn: async (registrationId) => {
+    const response = await axiosInstance.post(`/api/admin/events/registrations/${registrationId}/cancel-check-in`);
+    return response.data;
+  },
+
   cancelRegistration: async (registrationId) => {
     const response = await axiosInstance.delete(`/api/admin/events/registrations/${registrationId}`);
     return response.data;

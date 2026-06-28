@@ -10,5 +10,6 @@ public interface AdminRegistrationService {
     List<AdminRegistrationResponse> getEventRegistrations(UUID eventId);
     List<AdminRegistrationResponse> getAllRegistrations();
     MessageResponse manualCheckIn(UUID registrationId);
+    MessageResponse cancelCheckIn(UUID registrationId);
     MessageResponse cancelStudentRegistration(UUID registrationId);
 }

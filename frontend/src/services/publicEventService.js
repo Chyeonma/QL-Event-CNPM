@@ -39,5 +39,37 @@ export const publicEventService = {
   checkInEvent: async (id) => {
     const response = await axiosInstance.post(`${API_URL}/${id}/check-in`);
     return response.data;
+  },
+
+  // --- CÁC HÀM QUẢN LÝ SỰ KIỆN DÀNH CHO MANAGER/ADMIN ---
+
+  getEventManagers: async (id) => {
+    const response = await axiosInstance.get(`${API_URL}/${id}/managers`);
+    return response.data;
+  },
+
+  addEventManager: async (id, identifier) => {
+    const response = await axiosInstance.post(`${API_URL}/${id}/managers`, { identifier });
+    return response.data;
+  },
+
+  removeEventManager: async (id, userId) => {
+    const response = await axiosInstance.delete(`${API_URL}/${id}/managers/${userId}`);
+    return response.data;
+  },
+
+  getEventRegistrationsForManager: async (id) => {
+    const response = await axiosInstance.get(`${API_URL}/${id}/registrations`);
+    return response.data;
+  },
+
+  manualCheckInForManager: async (registrationId) => {
+    const response = await axiosInstance.post(`${API_URL}/registrations/${registrationId}/manual-check-in`);
+    return response.data;
+  },
+
+  cancelCheckInForManager: async (registrationId) => {
+    const response = await axiosInstance.post(`${API_URL}/registrations/${registrationId}/cancel-check-in`);
+    return response.data;
   }
 };

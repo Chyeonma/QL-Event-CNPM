@@ -58,6 +58,28 @@ CREATE TABLE event_targets (
 CREATE INDEX idx_event_targets_event ON event_targets(event_id);
 
 -- ==========================================
+-- 3.1 BẢNG EVENT_MANAGERS (Phân công người quản lý/CTV sự kiện)
+-- ==========================================
+CREATE TABLE event_managers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    event_id UUID NOT NULL,
+    user_id UUID NOT NULL,
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_event_managers_event 
+        FOREIGN KEY (event_id) 
+        REFERENCES events (id) 
+        ON DELETE CASCADE,
+    CONSTRAINT fk_event_managers_user 
+        FOREIGN KEY (user_id) 
+        REFERENCES users (id) 
+        ON DELETE CASCADE,
+    CONSTRAINT uq_event_user UNIQUE (event_id, user_id)
+);
+
+CREATE INDEX idx_event_managers_event ON event_managers(event_id);
+CREATE INDEX idx_event_managers_user ON event_managers(user_id);
+
+-- ==========================================
 -- 4. BẢNG EVENT_IMAGES (Nhiều ảnh cho 1 sự kiện)
 -- ==========================================
 CREATE TABLE event_images (

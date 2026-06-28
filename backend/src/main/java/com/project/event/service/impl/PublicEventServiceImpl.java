@@ -21,6 +21,7 @@ public class PublicEventServiceImpl implements PublicEventService {
     private final EventRepository eventRepository;
     private final RegistrationRepository registrationRepository;
     private final UserRepository userRepository;
+    private final EventManagerRepository eventManagerRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -161,6 +162,7 @@ public class PublicEventServiceImpl implements PublicEventService {
         
         boolean isReg = false;
         String userStatus = "NONE";
+        boolean isMgr = false;
 
         if (currentUserId != null) {
             Optional<Registration> regOpt = registrationRepository.findByEventIdAndStudentId(event.getId(), currentUserId);
@@ -172,6 +174,17 @@ public class PublicEventServiceImpl implements PublicEventService {
                     if (r.getCheckedInAt() != null) {
                         userStatus = "CHECKED_IN";
                     }
+                }
+            }
+            
+            User currentUser = userRepository.findById(currentUserId).orElse(null);
+            if (currentUser != null) {
+                if ("ADMIN".equals(currentUser.getRole())) {
+                    isMgr = true;
+                } else if (event.getCreatedBy() != null && event.getCreatedBy().getId().equals(currentUserId)) {
+                    isMgr = true;
+                } else if (eventManagerRepository.existsByEventIdAndUserId(event.getId(), currentUserId)) {
+                    isMgr = true;
                 }
             }
         }
@@ -198,6 +211,7 @@ public class PublicEventServiceImpl implements PublicEventService {
                 .registeredCount(regCount)
                 .isRegistered(isReg)
                 .userRegistrationStatus(userStatus)
+                .isManager(isMgr)
                 .targets(targetDtos)
                 .images(imageDtos)
                 .build();
