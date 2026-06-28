@@ -25,6 +25,8 @@ const StudentDashboard = () => {
   const [activeQR, setActiveQR] = useState(null); // registration ID showing QR
   const [actionLoading, setActionLoading] = useState(null);
   const [activeTab, setActiveTab] = useState('today'); // 'today', 'active', 'closed', 'calendar'
+  const [filterStartDate, setFilterStartDate] = useState('');
+  const [filterEndDate, setFilterEndDate] = useState('');
   const navigate = useNavigate();
 
   const fetchMyRegistrations = async () => {
@@ -60,7 +62,19 @@ const StudentDashboard = () => {
   const upcomingRegs = registrations.filter(r => r.checkedInAt == null);
   const checkedInRegs = registrations.filter(r => r.checkedInAt != null);
 
-  const totalPoints = checkedInRegs.reduce((sum, r) => sum + (r.trainingPoints || 0), 0);
+  const filteredCheckedInRegs = checkedInRegs.filter(reg => {
+    const dateToTest = reg.checkedInAt ? new Date(reg.checkedInAt) : (reg.startTime ? new Date(reg.startTime) : null);
+    if (!dateToTest) return true;
+    if (filterStartDate && new Date(filterStartDate) > dateToTest) return false;
+    if (filterEndDate) {
+      const end = new Date(filterEndDate);
+      end.setHours(23, 59, 59, 999);
+      if (end < dateToTest) return false;
+    }
+    return true;
+  });
+
+  const totalPoints = filteredCheckedInRegs.reduce((sum, r) => sum + (r.trainingPoints || 0), 0);
   const progressPercent = Math.min(100, Math.round((totalPoints / 100) * 100));
 
   const todayStr = new Date().toDateString();
@@ -357,13 +371,46 @@ const StudentDashboard = () => {
         {/* Cột phải: Tiến độ & Lịch sử */}
         <div className="stu-col-right">
           <div className="stu-card">
-            <div className="stu-card-header">
-              <h3><Star size={18} /> Tiến độ Điểm rèn luyện</h3>
+            <div className="stu-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+              <h3 style={{ margin: 0 }}><Star size={18} /> Tiến độ Điểm rèn luyện</h3>
+              {(filterStartDate || filterEndDate) && (
+                <button 
+                  type="button"
+                  onClick={() => { setFilterStartDate(''); setFilterEndDate(''); }}
+                  style={{ background: '#fee2e2', color: '#dc2626', border: 'none', padding: '4px 10px', borderRadius: '6px', fontSize: '11.5px', fontWeight: '700', cursor: 'pointer', transition: '0.2s' }}
+                >
+                  ✕ Xóa bộ lọc
+                </button>
+              )}
             </div>
             <div className="stu-card-body">
+              {/* KHUNG LỌC NGÀY */}
+              <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '18px' }}>
+                <div style={{ fontSize: '12.5px', fontWeight: '700', color: '#334155', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Calendar size={15} color="#2563eb" /> Lọc theo khoảng thời gian (Học kỳ):
+                </div>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <input
+                    type="date"
+                    value={filterStartDate}
+                    onChange={(e) => setFilterStartDate(e.target.value)}
+                    style={{ flex: '1 1 120px', padding: '8px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', outline: 'none', color: '#0f172a' }}
+                    title="Từ ngày"
+                  />
+                  <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>→</span>
+                  <input
+                    type="date"
+                    value={filterEndDate}
+                    onChange={(e) => setFilterEndDate(e.target.value)}
+                    style={{ flex: '1 1 120px', padding: '8px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', outline: 'none', color: '#0f172a' }}
+                    title="Đến ngày"
+                  />
+                </div>
+              </div>
+
               <div className="stu-progress-info">
-                <span>Mục tiêu chuẩn: 100 điểm</span>
-                <span className="blue">Đạt {progressPercent}%</span>
+                <span>{filterStartDate || filterEndDate ? 'Trong khoảng đã chọn' : 'Mục tiêu chuẩn: 100 điểm'}</span>
+                <span className="blue">Đạt {totalPoints} điểm</span>
               </div>
               <div className="stu-progress-bar" style={{ marginBottom: '24px' }}>
                 <div className="stu-progress-fill blue" style={{ width: `${progressPercent}%` }}></div>
@@ -371,21 +418,21 @@ const StudentDashboard = () => {
               
               <h4 style={{ fontSize: '13px', fontWeight: 700, marginBottom: '12px', color: 'var(--edu-text-muted)', textTransform: 'uppercase' }}>Ghi nhận tích lũy</h4>
               <p style={{ fontSize: '14px', color: 'var(--edu-text)', lineHeight: 1.6 }}>
-                Bạn đã tích lũy được <strong>{totalPoints} điểm</strong> từ việc tham gia các hoạt động ngoại khóa. Tiếp tục đăng ký và tham dự đầy đủ để nâng cao mức xếp loại rèn luyện nhé!
+                Bạn đã tích lũy được <strong>{totalPoints} điểm</strong> {filterStartDate || filterEndDate ? 'trong khoảng thời gian lọc' : 'từ việc tham gia các hoạt động ngoại khóa'}. Tiếp tục đăng ký và tham dự đầy đủ để nâng cao mức xếp loại rèn luyện nhé!
               </p>
             </div>
           </div>
 
           <div className="stu-card">
             <div className="stu-card-header">
-              <h3><CheckCircle size={18} /> Lịch sử hoạt động</h3>
+              <h3><CheckCircle size={18} /> Lịch sử hoạt động ({filteredCheckedInRegs.length})</h3>
             </div>
             <div className="stu-card-body">
               <div className="stu-tasks">
-                {checkedInRegs.length === 0 ? (
-                  <p className="stu-text-muted" style={{ textAlign: 'center', padding: '16px 0' }}>Chưa có lịch sử điểm danh sự kiện nào.</p>
+                {filteredCheckedInRegs.length === 0 ? (
+                  <p className="stu-text-muted" style={{ textAlign: 'center', padding: '16px 0' }}>Không có sự kiện điểm danh nào trong khoảng thời gian này.</p>
                 ) : (
-                  checkedInRegs.map(reg => (
+                  filteredCheckedInRegs.map(reg => (
                     <Link 
                       to={`/explore/${reg.eventId}`} 
                       className="stu-task-item" 
