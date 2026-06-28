@@ -74,7 +74,7 @@ const StudentDashboard = () => {
     return true;
   });
 
-  const totalPoints = filteredCheckedInRegs.reduce((sum, r) => sum + (r.trainingPoints || 0), 0);
+  const totalPoints = filteredCheckedInRegs.reduce((sum, r) => sum + (r.trainingPoints ?? 0), 0);
   const progressPercent = Math.min(100, Math.round((totalPoints / 100) * 100));
 
   const todayStr = new Date().toDateString();
@@ -131,7 +131,7 @@ const StudentDashboard = () => {
             </Link>
             <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
               <span style={{ fontSize: '12px', fontWeight: 800, background: '#fef3c7', color: '#d97706', padding: '3px 10px', borderRadius: '12px', border: '1px solid #fde68a' }}>
-                +{reg.trainingPoints || 0} ĐRL
+                +{reg.trainingPoints ?? 0} ĐRL
               </span>
               {isCheckedIn ? (
                 <span className="badge-status green" style={{ fontSize: '11px', padding: '3px 8px' }}>Đã điểm danh</span>
@@ -447,7 +447,7 @@ const StudentDashboard = () => {
                         <h4 style={{ color: 'var(--edu-text)', fontSize: '14px', fontWeight: 700, margin: '0 0 4px 0' }}>{reg.eventTitle} <span style={{ fontSize: '11px', color: '#2563eb' }}>↗</span></h4>
                         <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>Đã Check-in &bull; {reg.checkedInAt ? new Date(reg.checkedInAt).toLocaleDateString('vi-VN') : 'Gần đây'}</p>
                       </div>
-                      <span style={{ fontSize: '13px', fontWeight: 800, color: '#10b981' }}>+{reg.trainingPoints || 0} ĐRL</span>
+                      <span style={{ fontSize: '13px', fontWeight: 800, color: '#10b981' }}>+{reg.trainingPoints ?? 0} ĐRL</span>
                     </Link>
                   ))
                 )}

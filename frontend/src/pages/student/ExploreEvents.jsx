@@ -172,7 +172,7 @@ const ExploreEvents = () => {
                   </p>
                   <div className="event-card-footer" style={{ borderTop: '1px solid var(--edu-border)', paddingTop: '16px', marginTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                      <span className="event-dr-points" style={{ opacity: isClosed ? 0.7 : 1 }}>+{ev.trainingPoints || 5} ĐRL</span>
+                      <span className="event-dr-points" style={{ opacity: isClosed ? 0.7 : 1 }}>+{ev.trainingPoints ?? 0} ĐRL</span>
                       <button 
                         onClick={() => navigate(`/explore/${ev.id}`)}
                         style={{ background: 'transparent', border: 'none', color: '#3b82f6', fontSize: '12px', fontWeight: '600', padding: 0, cursor: 'pointer', textAlign: 'left', display: 'inline-flex', alignItems: 'center', gap: '2px' }}

@@ -228,7 +228,7 @@ const StudentEventDetail = () => {
           {/* Badges nổi bật trên ảnh banner */}
           <div style={{ position: 'absolute', bottom: '24px', left: '28px', display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
             <span style={{ background: 'var(--edu-primary)', color: 'white', padding: '6px 14px', borderRadius: '50px', fontSize: '13px', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '6px', boxShadow: '0 4px 12px rgba(37,99,235,0.4)' }}>
-              <Sparkles size={14} /> +{event.trainingPoints || 5} Điểm rèn luyện
+              <Sparkles size={14} /> +{event.trainingPoints ?? 0} Điểm rèn luyện
             </span>
             {isClosed ? (
               <span style={{ background: 'rgba(71, 85, 105, 0.9)', color: 'white', padding: '6px 14px', borderRadius: '50px', fontSize: '13px', fontWeight: '700', backdropFilter: 'blur(4px)', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
@@ -381,7 +381,7 @@ const StudentEventDetail = () => {
               </div>
               <div>
                 <span style={{ fontSize: '12px', color: '#64748b', fontWeight: '600' }}>Quyền lợi rèn luyện</span>
-                <strong style={{ display: 'block', fontSize: '16px', color: '#1e40af' }}>+{event.trainingPoints || 5} Điểm rèn luyện</strong>
+                <strong style={{ display: 'block', fontSize: '16px', color: '#1e40af' }}>+{event.trainingPoints ?? 0} Điểm rèn luyện</strong>
               </div>
             </div>
 
@@ -401,7 +401,7 @@ const StudentEventDetail = () => {
                   <CheckCircle2 size={22} color="#10b981" /> Bạn đã được điểm danh thành công!
                 </div>
                 <p style={{ fontSize: '13px', color: '#64748b', margin: 0, textAlign: 'center', fontStyle: 'italic', lineHeight: '1.4' }}>
-                  * Sự kiện đã ghi nhận sự tham gia hợp lệ của bạn (+{event.trainingPoints || 5} ĐRL). Không thể hủy đăng ký sau khi đã điểm danh.
+                  * Sự kiện đã ghi nhận sự tham gia hợp lệ của bạn (+{event.trainingPoints ?? 0} ĐRL). Không thể hủy đăng ký sau khi đã điểm danh.
                 </p>
               </div>
             ) : event.isRegistered ? (

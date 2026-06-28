@@ -410,7 +410,7 @@ const AdminDashboard = () => {
                   <div>
                     <span>Điểm rèn luyện tích lũy</span>
                     <strong>
-                      +{selectedEvent.trainingPoints || 0} điểm
+                      +{selectedEvent.trainingPoints ?? 0} điểm
                     </strong>
                   </div>
                 </div>

@@ -64,8 +64,8 @@ const AdminEvents = () => {
         location: draftLocation,
         startTime: draftStartTime,
         endTime: draftEndTime,
-        capacity: draftCapacity || 0,
-        trainingPoints: draftTrainingPoints || 0,
+        capacity: draftCapacity ?? 0,
+        trainingPoints: draftTrainingPoints ?? 0,
         description: draftDescription,
         status: draftStatus,
         imageUrls: draftImageUrl && draftImageUrl.trim() !== '' ? [draftImageUrl.trim()] : []
