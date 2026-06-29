@@ -192,6 +192,38 @@ const AdminEventDetail = () => {
       (student.email || '').toLowerCase().includes(searchStudent.toLowerCase())
   );
 
+  const handleExportCSV = () => {
+    const headers = ['STT', 'Mã SV', 'Họ và Tên', 'Lớp', 'Email', 'Thời gian đăng ký', 'Trạng thái', 'Thời gian điểm danh'];
+    const rows = filteredRegistrants.map((student, idx) => {
+      let statusText = 'Chờ check-in';
+      if (student.status === 'CANCELLED') statusText = 'Đã hủy suất';
+      else if (student.checkedInAt) statusText = 'Đã đến';
+
+      const regTime = student.registeredAt ? new Date(student.registeredAt).toLocaleString('vi-VN') : '';
+      const checkInTime = student.checkedInAt ? new Date(student.checkedInAt).toLocaleString('vi-VN') : '';
+
+      return [
+        idx + 1,
+        `"${(student.studentCode || '').replace(/"/g, '""')}"`,
+        `"${(student.fullName || '').replace(/"/g, '""')}"`,
+        `"${(student.classCode || '').replace(/"/g, '""')}"`,
+        `"${(student.email || '').replace(/"/g, '""')}"`,
+        `"${regTime}"`,
+        `"${statusText}"`,
+        `"${checkInTime}"`
+      ];
+    });
+    const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const cleanTitle = (eventData?.title || 'su-kien').toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
+    a.download = `danh-sach-diem-danh-${cleanTitle}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (!eventData || !editData) {
     return <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>Đang tải dữ liệu sự kiện...</div>;
   }
@@ -551,8 +583,13 @@ const AdminEventDetail = () => {
 
                       <div style={{ width: '1px', height: '32px', background: '#dde5ef' }}></div>
 
-                      <button className="btn btn-secondary" style={{ background: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Download size={16} /> Xuất Excel
+                      <button 
+                        type="button"
+                        onClick={handleExportCSV}
+                        className="btn btn-secondary" 
+                        style={{ background: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+                      >
+                        <Download size={16} /> Xuất CSV
                       </button>
 
                       <button
